@@ -1,0 +1,44 @@
+{
+  "name": "fb-cache",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "engines": {
+    "node": ">=12.18.3"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synergyvision/fbcache.git"
+  },
+  "keywords": [
+    "firebase",
+    "realtime",
+    "database",
+    "firestore",
+    "cache"
+  ],
+  "author": "Luis Fuentes <luisrf0540@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/synergyvision/fbcache/issues"
+  },
+  "homepage": "https://github.com/synergyvision/fbcache#readme",
+  "dependencies": {
+    "firebase-admin": "^9.1.1",
+    "moment": "^2.27.0",
+    "node-cache": "^5.1.2",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.11.5",
+    "@babel/core": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "jest": "^26.4.2"
+  }
+}
