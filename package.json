@@ -1,16 +1,17 @@
 {
-  "name": "fb-cache",
+  "name": "fbcache",
   "version": "0.0.1",
   "description": "",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "directories": {
     "doc": "docs"
   },
   "engines": {
-    "node": ">=12.18.3"
+    "node": "12.18.3"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "babel lib --out-dir dist"
   },
   "repository": {
     "type": "git",
