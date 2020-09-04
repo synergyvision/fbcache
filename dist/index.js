@@ -82,7 +82,7 @@ function getRoutes(routes, read_only) {
     if (!route.name) throw new Error("A route defined to Firebase don't have name");
     if (route.refresh && route.period) throw new Error("Refresh and period can't be defined in the same time in the same route");
     if (!route.period && route.start) throw new Error("start can't be defined without period");
-    route.id = uuid.v4();
+    route.id = (0, _uuid.v4)();
     if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = (0, _moment["default"])();
     if (route.read_only === undefined) if (read_only === undefined) route.read_only = true;else route.read_only = read_only;
     arrayRoutes.push(route);
@@ -91,8 +91,6 @@ function getRoutes(routes, read_only) {
 }
 
 var FBCache = {};
-
-exports.FBCache = FBCache;
 
 /**
  * Inicialize FBCache
@@ -112,6 +110,4 @@ FBCache.init = function (config) {
   if (config.max_size) routes.max_size = config.max_size;
 };
 
-function qwerty () {
-  
-}
+exports.FBCache = FBCache;
