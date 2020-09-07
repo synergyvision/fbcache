@@ -2,11 +2,6 @@
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.FBCache = exports.service = void 0;
-
 var _nodeCache = _interopRequireDefault(require("node-cache"));
 
 var admin = _interopRequireWildcard(require("firebase-admin"));
@@ -30,20 +25,18 @@ var service = {
   FIRESTORE: 'Firestore',
   REAL_TIME: 'Real Time Database'
 };
-
-exports.service = service;
-
 /**
  * Function to establish connection with a firebase project
  *
  * @param   {string}  url             Firebase project URL
- * @param   {string}  credential      Token OAuth or route to the credentials file, can be null if you want to connect with the default credential
  * @param   {string}  credentialType  Indicates if the credential is a token or a route to a credential file, can be null if you want to connect with the default credential
+ * @param   {string}  credential      Token OAuth or route to the credentials file, can be null if you want to connect with the default credential
  *
  * @return  {void}
  */
-function firebaseConection(url, credential, credentialType) {
-  if (credential && !credentialType) throw new Error("credential_type is undefined");
+
+function firebaseConection(url, credentialType, credential) {
+  if (credential && !credentialType) throw new Error("credentialType is undefined");
 
   switch (credentialType) {
     case "file":
@@ -65,7 +58,7 @@ function firebaseConection(url, credential, credentialType) {
       break;
 
     default:
-      throw new Error("".concat(credentialType, " is not a valid value for credential_tipe"));
+      throw new Error("".concat(credentialType, " is not a valid value for credentialType"));
   }
 }
 /**
@@ -76,6 +69,8 @@ function firebaseConection(url, credential, credentialType) {
  *
  * @return  {Array}              The routes with the configuration 
  */
+
+
 function getRoutes(routes, read_only) {
   var arrayRoutes = [];
   routes.forEach(function (route) {
@@ -91,17 +86,20 @@ function getRoutes(routes, read_only) {
 }
 
 var FBCache = {};
-
 /**
  * Inicialize FBCache
  *
- * @param   {Object}  config  Config object with the url to the project, credential, routes for the cache and the configuration data for the library
+ * @param   {Object}            config          Config object with the routes for the cache and the configuration data for the library
+ * @param   {string}            url             Firebase project URL
+ * @param   {string}            credentialType  Indicates the type of the credential to connect to the Firebase Project
+ * @param   {string || Object}  credential      Credential to connect to the Firebase Project
  *
- * @return  {void}
+ * @return  {void}                              
  */
-FBCache.init = function (config) {
-  if (!config.url) throw new Error("url is undefined");
-  firebaseConection(config.url, config.credential, config.credential_type);
+
+FBCache.init = function (config, url, credentialType, credential) {
+  if (!url) throw new Error("url is undefined");
+  firebaseConection(url, credentialType, credential);
   rtdb = admin.database();
   firestore = admin.firestore();
   if (config.read_only || config.read_only === undefined) routes.read_only = true;else routes.read_only = false;
@@ -110,4 +108,7 @@ FBCache.init = function (config) {
   if (config.max_size) routes.max_size = config.max_size;
 };
 
-exports.FBCache = FBCache;
+module.exports = {
+  FBCache: FBCache,
+  service: service
+};

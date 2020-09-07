@@ -22,13 +22,19 @@ import { FBCache } from 'fbcache'
 
 ```
 import { FBCache } from 'fbcache';
-import import * as config from "./fbcache.config.json";
+import * as config from "./fbcache.config.json";
 
-FBCache.init(config);
+FBCache.init(config, projectURL, credentialType, credential);
 
 ```
 
 fbcache.config.json, es un archivo que contendrá un objeto con las configuraciones que se le quieran dar a la librería, para conocer acerca de este archivo haz click [aquí](https://github.com/synergyvision/fbcache/issues/5)
+
+_projectURL_ es el URL al projecto de Firebase en donde se encuentren los childs de Real Time Database y/o las colecciones de Firestore
+
+_credentialType_ indica el tipo de credencial con la que se quiere autenticar a Firebase, ya sea con un token OAuth, o con un archivo de credenciales generado desde Firebase, los valores que puede recibir este método son "token" y "file"
+
+_credential_ es la credencial con la que se quiere autenticar a Firebase, puede recibir un string con un token OAuth, un string con la ruta al archivo de credenciales .json generado por Firebase, o directamente el objeto de dicho archivo. Para pasar el string con el token se debe a _credentialType_ el valor "token", para el string del archivo o el objeto se debe pasar a _credentialType_ el valor "file"
 
 ## Métodos
 
