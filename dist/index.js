@@ -16,15 +16,37 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//-------------------------------------------INIT CONSTANTS-----------------------------------------------
 var myCache = new _nodeCache["default"]();
 var formatMoment = "YYYY-MM-DD hh:mm:ss a";
 var rtdb = null;
 var firestore = null;
-var routes = {};
+var routes = {}; //-------------------------------------------INIT CONSTANTS-----------------------------------------------
+//--------------------------------------------ENUM SERVICE------------------------------------------------
+
 var service = {
   FIRESTORE: 'Firestore',
   REAL_TIME: 'Real Time Database'
-};
+}; //--------------------------------------------ENUM SERVICE------------------------------------------------
+// -----------------------------------------ARRAY PROTOTYPE-----------------------------------------------
+
+Array.prototype.findOneBy = function (column, value) {
+  for (var i = 0; i < this.length; i++) {
+    var object = this[i];
+
+    if (column in object && object[column] === value) {
+      return object;
+    }
+  }
+
+  return null;
+}; // -----------------------------------------ARRAY PROTOTYPE-----------------------------------------------
+//---------------------------------------------FUNCTIONS--------------------------------------------------
+
 /**
  * Function to establish connection with a firebase project
  *
@@ -35,8 +57,9 @@ var service = {
  * @return  {void}
  */
 
+
 function firebaseConection(url, credentialType, credential) {
-  if (credential && !credentialType) throw new Error("credentialType is undefined");
+  if (credential && !credentialType) throw new Error("credential can't be defined without credentialType");
 
   switch (credentialType) {
     case "file":
@@ -85,6 +108,9 @@ function getRoutes(routes, read_only) {
   return arrayRoutes;
 }
 
+; //---------------------------------------------FUNCTIONS--------------------------------------------------
+//--------------------------------------------FBCACHE METHODS---------------------------------------------
+
 var FBCache = {};
 /**
  * Inicialize FBCache
@@ -108,7 +134,164 @@ FBCache.init = function (config, url, credentialType, credential) {
   if (config.max_size) routes.max_size = config.max_size;
 };
 
+FBCache.get = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dbms, route) {
+    var cacheRoute, infoCache, infoDB, collection;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            cacheRoute = null;
+            infoCache = null;
+            infoDB = [];
+            _context.t0 = dbms;
+            _context.next = _context.t0 === service.REAL_TIME ? 6 : _context.t0 === service.FIRESTORE ? 26 : 47;
+            break;
+
+          case 6:
+            if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
+
+            if (!cacheRoute) {
+              _context.next = 20;
+              break;
+            }
+
+            infoCache = myCache.get(cacheRoute.id);
+
+            if (!infoCache) {
+              _context.next = 13;
+              break;
+            }
+
+            return _context.abrupt("return", {
+              data: infoCache,
+              cache: true
+            });
+
+          case 13:
+            _context.next = 15;
+            return rtdb.ref(route).once('value', function (snapshot) {
+              return snapshot.val();
+            });
+
+          case 15:
+            infoDB = _context.sent;
+            myCache.set(cacheRoute.id, infoDB, 60);
+            return _context.abrupt("return", {
+              data: infoDB,
+              cache: false,
+              startCache: true
+            });
+
+          case 18:
+            _context.next = 24;
+            break;
+
+          case 20:
+            _context.next = 22;
+            return rtdb.ref(route).once('value', function (snapshot) {
+              return snapshot.val();
+            });
+
+          case 22:
+            infoDB = _context.sent;
+            return _context.abrupt("return", {
+              data: infoDB,
+              cache: false,
+              startCache: false
+            });
+
+          case 24:
+            ;
+            return _context.abrupt("break", 48);
+
+          case 26:
+            collection = null;
+            if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
+
+            if (!cacheRoute) {
+              _context.next = 41;
+              break;
+            }
+
+            infoCache = myCache.get(cacheRoute.id);
+
+            if (!infoCache) {
+              _context.next = 34;
+              break;
+            }
+
+            return _context.abrupt("return", {
+              data: infoCache,
+              cache: true
+            });
+
+          case 34:
+            collection = firestore.collection(route);
+            _context.next = 37;
+            return collection.get().then(function (snapshot) {
+              snapshot.forEach(function (doc) {
+                infoDB.push({
+                  id: doc.id,
+                  data: doc.data()
+                });
+              });
+            });
+
+          case 37:
+            myCache.set(cacheRoute.id, infoDB, 60);
+            return _context.abrupt("return", {
+              data: infoDB,
+              cache: false,
+              startCache: true
+            });
+
+          case 39:
+            _context.next = 45;
+            break;
+
+          case 41:
+            collection = firestore.collection(route);
+            _context.next = 44;
+            return collection.get().then(function (snapshot) {
+              snapshot.forEach(function (doc) {
+                infoDB.push({
+                  id: doc.id,
+                  data: doc.data()
+                });
+              });
+            });
+
+          case 44:
+            return _context.abrupt("return", {
+              data: infoDB,
+              cache: false,
+              startCache: false
+            });
+
+          case 45:
+            ;
+            return _context.abrupt("break", 48);
+
+          case 47:
+            throw new Error("dbms value invalid");
+
+          case 48:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function (_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}(); //--------------------------------------------FBCACHE METHODS---------------------------------------------
+//------------------------------------------------EXPORTS-------------------------------------------------
+
+
 module.exports = {
   FBCache: FBCache,
   service: service
-};
+}; //------------------------------------------------EXPORTS-------------------------------------------------
