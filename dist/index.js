@@ -101,7 +101,7 @@ function getRoutes(routes, read_only) {
     if (route.refresh && route.period) throw new Error("Refresh and period can't be defined in the same time in the same route");
     if (!route.period && route.start) throw new Error("start can't be defined without period");
     route.id = (0, _uuid.v4)();
-    if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = _moment["default"];
+    if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = (0, _moment["default"])();
     if (route.read_only === undefined) if (read_only === undefined) route.read_only = true;else route.read_only = read_only;
     arrayRoutes.push(route);
   });
@@ -109,6 +109,16 @@ function getRoutes(routes, read_only) {
 }
 
 ;
+
+function getDeadLinePeriod(now, lastCheckPoint, quantity, unit) {
+  var newCheckPoint = lastCheckPoint.clone();
+
+  while (newCheckPoint <= now) {
+    newCheckPoint.add(quantity, unit);
+  }
+
+  return newCheckPoint;
+}
 
 function setTTL(time, type, start) {
   var baseTimeTTL = time.split(' ');
@@ -121,24 +131,22 @@ function setTTL(time, type, start) {
   switch (type) {
     case "refresh":
       deadLine = (0, _moment["default"])().add(quantity, unit);
-      seconds = _moment["default"].duration(deadLine.diff(now)).as('seconds');
       break;
 
     case "period":
-      break;
-
-    default:
+      deadLine = getDeadLinePeriod(now, start, quantity, unit);
       break;
   }
 
   ;
+  seconds = _moment["default"].duration(deadLine.diff(now)).as('seconds');
   return Math.round(seconds);
 }
 
 ;
 
 function setCache(cacheRoute, info) {
-  if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL());
+  if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL(cacheRoute.period, "period", cacheRoute.start));
   return true;
 }
 
