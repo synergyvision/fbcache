@@ -101,11 +101,45 @@ function getRoutes(routes, read_only) {
     if (route.refresh && route.period) throw new Error("Refresh and period can't be defined in the same time in the same route");
     if (!route.period && route.start) throw new Error("start can't be defined without period");
     route.id = (0, _uuid.v4)();
-    if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = (0, _moment["default"])();
+    if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = _moment["default"];
     if (route.read_only === undefined) if (read_only === undefined) route.read_only = true;else route.read_only = read_only;
     arrayRoutes.push(route);
   });
   return arrayRoutes;
+}
+
+;
+
+function setTTL(time, type, start) {
+  var baseTimeTTL = time.split(' ');
+  var quantity = baseTimeTTL[0];
+  var unit = baseTimeTTL[1];
+  var now = (0, _moment["default"])();
+  var deadLine = null;
+  var seconds = null;
+
+  switch (type) {
+    case "refresh":
+      deadLine = (0, _moment["default"])().add(quantity, unit);
+      seconds = _moment["default"].duration(deadLine.diff(now)).as('seconds');
+      break;
+
+    case "period":
+      break;
+
+    default:
+      break;
+  }
+
+  ;
+  return Math.round(seconds);
+}
+
+;
+
+function setCache(cacheRoute, info) {
+  if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL());
+  return true;
 }
 
 ; //---------------------------------------------FUNCTIONS--------------------------------------------------
@@ -136,7 +170,7 @@ FBCache.init = function (config, url, credentialType, credential) {
 
 FBCache.get = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dbms, route) {
-    var cacheRoute, infoCache, infoDB, collection;
+    var cacheRoute, infoCache, infoDB, updateCache, collection;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -144,22 +178,23 @@ FBCache.get = /*#__PURE__*/function () {
             cacheRoute = null;
             infoCache = null;
             infoDB = [];
+            updateCache = false;
             _context.t0 = dbms;
-            _context.next = _context.t0 === service.REAL_TIME ? 6 : _context.t0 === service.FIRESTORE ? 26 : 47;
+            _context.next = _context.t0 === service.REAL_TIME ? 7 : _context.t0 === service.FIRESTORE ? 27 : 48;
             break;
 
-          case 6:
+          case 7:
             if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context.next = 20;
+              _context.next = 21;
               break;
             }
 
             infoCache = myCache.get(cacheRoute.id);
 
             if (!infoCache) {
-              _context.next = 13;
+              _context.next = 14;
               break;
             }
 
@@ -168,32 +203,32 @@ FBCache.get = /*#__PURE__*/function () {
               cache: true
             });
 
-          case 13:
-            _context.next = 15;
+          case 14:
+            _context.next = 16;
             return rtdb.ref(route).once('value', function (snapshot) {
               return snapshot.val();
             });
 
-          case 15:
+          case 16:
             infoDB = _context.sent;
-            myCache.set(cacheRoute.id, infoDB, 60);
+            updateCache = setCache(cacheRoute, infoDB);
             return _context.abrupt("return", {
               data: infoDB,
               cache: false,
-              startCache: true
+              startCache: updateCache
             });
 
-          case 18:
-            _context.next = 24;
+          case 19:
+            _context.next = 25;
             break;
 
-          case 20:
-            _context.next = 22;
+          case 21:
+            _context.next = 23;
             return rtdb.ref(route).once('value', function (snapshot) {
               return snapshot.val();
             });
 
-          case 22:
+          case 23:
             infoDB = _context.sent;
             return _context.abrupt("return", {
               data: infoDB,
@@ -201,23 +236,23 @@ FBCache.get = /*#__PURE__*/function () {
               startCache: false
             });
 
-          case 24:
+          case 25:
             ;
-            return _context.abrupt("break", 48);
+            return _context.abrupt("break", 49);
 
-          case 26:
+          case 27:
             collection = null;
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context.next = 41;
+              _context.next = 42;
               break;
             }
 
             infoCache = myCache.get(cacheRoute.id);
 
             if (!infoCache) {
-              _context.next = 34;
+              _context.next = 35;
               break;
             }
 
@@ -226,9 +261,9 @@ FBCache.get = /*#__PURE__*/function () {
               cache: true
             });
 
-          case 34:
+          case 35:
             collection = firestore.collection(route);
-            _context.next = 37;
+            _context.next = 38;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -238,21 +273,21 @@ FBCache.get = /*#__PURE__*/function () {
               });
             });
 
-          case 37:
-            myCache.set(cacheRoute.id, infoDB, 60);
+          case 38:
+            updateCache = setCache(cacheRoute, infoDB);
             return _context.abrupt("return", {
               data: infoDB,
               cache: false,
-              startCache: true
+              startCache: updateCache
             });
 
-          case 39:
-            _context.next = 45;
+          case 40:
+            _context.next = 46;
             break;
 
-          case 41:
+          case 42:
             collection = firestore.collection(route);
-            _context.next = 44;
+            _context.next = 45;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -262,21 +297,21 @@ FBCache.get = /*#__PURE__*/function () {
               });
             });
 
-          case 44:
+          case 45:
             return _context.abrupt("return", {
               data: infoDB,
               cache: false,
               startCache: false
             });
 
-          case 45:
+          case 46:
             ;
-            return _context.abrupt("break", 48);
-
-          case 47:
-            throw new Error("dbms value invalid");
+            return _context.abrupt("break", 49);
 
           case 48:
+            throw new Error("dbms value invalid");
+
+          case 49:
           case "end":
             return _context.stop();
         }
