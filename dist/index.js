@@ -147,7 +147,23 @@ function getDeadLinePeriod(now, lastCheckPoint, quantity, unit) {
   return newCheckPoint;
 }
 
-function setTTL(time, type, start) {
+function updateStartRoute(id, deadLine) {
+  routes.realtime.forEach(function (route) {
+    if (route.id === id) {
+      route.start = deadLine;
+      return true;
+    }
+  });
+  routes.firestore.forEach(function (route) {
+    if (route.id === id) {
+      route.start = deadLine;
+      return true;
+    }
+  });
+  return false;
+}
+
+function setTTL(id, time, type, start) {
   var baseTimeTTL = time.split(' ');
   var quantity = baseTimeTTL[0];
   var unit = baseTimeTTL[1];
@@ -166,6 +182,7 @@ function setTTL(time, type, start) {
   }
 
   ;
+  updateStartRoute(id, deadLine);
   seconds = _moment["default"].duration(deadLine.diff(now)).as('seconds');
   return Math.round(seconds);
 }
@@ -174,13 +191,60 @@ function setTTL(time, type, start) {
 
 function setCache(cacheRoute, info) {
   if (writeCache()) {
-    if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL(cacheRoute.period, "period", cacheRoute.start));
+    if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.id, cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL(cacheRoute.id, cacheRoute.period, "period", cacheRoute.start));
     return true;
   } else return false;
 }
 
-; //---------------------------------------------FUNCTIONS--------------------------------------------------
+;
+
+function getNewData(dbms, oldData, insertData, id) {
+  var newData = oldData;
+  var update = true;
+
+  switch (dbms) {
+    case service.REAL_TIME:
+      newData[id] = insertData;
+      return newData;
+      break;
+
+    case service.FIRESTORE:
+      newData.forEach(function (doc) {
+        if (doc.id === id) {
+          doc.data = insertData;
+          update = false;
+        }
+      });
+      if (update) newData.push({
+        id: id,
+        data: insertData
+      });
+      return newData;
+      break;
+  }
+}
+
+function getActualTTL(deadLine) {
+  var now = (0, _moment["default"])();
+
+  var seconds = _moment["default"].duration(deadLine.diff(now)).as('seconds');
+
+  return Math.round(seconds);
+}
+
+function insertCache(cacheRoute, dbms, insertData, id) {
+  if (writeCache()) {
+    var oldData = myCache.get(cacheRoute.id);
+
+    if (oldData) {
+      var newData = getNewData(dbms, oldData, insertData, id);
+      myCache.set(cacheRoute.id, newData, getActualTTL(cacheRoute.start));
+      return true;
+    } else return false;
+  } else return false;
+} //---------------------------------------------FUNCTIONS--------------------------------------------------
 //--------------------------------------------FBCACHE METHODS---------------------------------------------
+
 
 var FBCache = {};
 /**
@@ -370,7 +434,7 @@ FBCache.get = /*#__PURE__*/function () {
 
 FBCache.insert = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dbms, route, data, id) {
-    var cacheRoute, childRef, child, collection, generateID;
+    var cacheRoute, childRef, child, collection, generateID, updateCache, routeInCache;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -380,80 +444,104 @@ FBCache.insert = /*#__PURE__*/function () {
             child = null;
             collection = null;
             generateID = null;
+            updateCache = false;
+            routeInCache = false;
             _context2.t0 = dbms;
-            _context2.next = _context2.t0 === service.REAL_TIME ? 8 : _context2.t0 === service.FIRESTORE ? 23 : 35;
+            _context2.next = _context2.t0 === service.REAL_TIME ? 10 : _context2.t0 === service.FIRESTORE ? 28 : 43;
             break;
 
-          case 8:
+          case 10:
             if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context2.next = 11;
+              _context2.next = 13;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 11:
+          case 13:
             if (!id) {
-              _context2.next = 18;
+              _context2.next = 20;
               break;
             }
 
             childRef = rtdb.ref(route);
             child = childRef.child(id);
-            _context2.next = 16;
+            _context2.next = 18;
             return child.set(data);
 
-          case 16:
-            _context2.next = 22;
+          case 18:
+            _context2.next = 25;
             break;
 
-          case 18:
+          case 20:
             childRef = rtdb.ref();
             child = childRef.child(route);
-            _context2.next = 22;
+            _context2.next = 24;
             return child.push(data);
 
-          case 22:
-            return _context2.abrupt("break", 36);
+          case 24:
+            generateID = _context2.sent;
 
-          case 23:
+          case 25:
+            if (cacheRoute) {
+              routeInCache = true;
+              updateCache = insertCache(cacheRoute, service.REAL_TIME, data, id ? id : generateID.key);
+            }
+
+            return _context2.abrupt("return", {
+              routeInConfig: routeInCache,
+              updateCache: updateCache
+            });
+
+          case 28:
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context2.next = 26;
+              _context2.next = 31;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 26:
+          case 31:
             collection = firestore.collection(route);
 
             if (!id) {
-              _context2.next = 32;
+              _context2.next = 37;
               break;
             }
 
-            _context2.next = 30;
+            _context2.next = 35;
             return collection.doc(id).set(data);
 
-          case 30:
-            _context2.next = 34;
+          case 35:
+            _context2.next = 40;
             break;
 
-          case 32:
-            _context2.next = 34;
+          case 37:
+            _context2.next = 39;
             return collection.add(data);
 
-          case 34:
-            return _context2.abrupt("break", 36);
+          case 39:
+            generateID = _context2.sent;
 
-          case 35:
+          case 40:
+            if (cacheRoute) {
+              routeInCache = true;
+              updateCache = insertCache(cacheRoute, service.FIRESTORE, data, id ? id : generateID.id);
+            }
+
+            return _context2.abrupt("return", {
+              routeInConfig: routeInCache,
+              updateCache: updateCache
+            });
+
+          case 43:
             throw new Error("dbms value invalid");
 
-          case 36:
+          case 44:
           case "end":
             return _context2.stop();
         }
