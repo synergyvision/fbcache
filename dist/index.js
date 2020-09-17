@@ -84,6 +84,26 @@ function firebaseConection(url, credentialType, credential) {
       throw new Error("".concat(credentialType, " is not a valid value for credentialType"));
   }
 }
+
+function setMaxSize(max_size) {
+  var baseMaxSize = max_size.split(' ');
+  var quantity = baseMaxSize[0];
+  var unit = baseMaxSize[1];
+
+  switch (unit) {
+    case "B":
+      return quantity * 1;
+
+    case "kB":
+      return quantity * 1024;
+
+    case "MB":
+      return quantity * 1048576;
+
+    default:
+      throw new Error("max_size unit invalid");
+  }
+}
 /**
  * Function to get from the config object the routes to Real Time Database or Firestore for the cache and checks if is all ok with the values in the config object 
  *
@@ -109,6 +129,13 @@ function getRoutes(routes, read_only) {
 }
 
 ;
+
+function writeCache() {
+  if (routes.max_size) {
+    var stats = myCache.getStats();
+    if (stats.vsize >= routes.max_size) return false;else return true;
+  } else return true;
+}
 
 function getDeadLinePeriod(now, lastCheckPoint, quantity, unit) {
   var newCheckPoint = lastCheckPoint.clone();
@@ -146,8 +173,10 @@ function setTTL(time, type, start) {
 ;
 
 function setCache(cacheRoute, info) {
-  if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL(cacheRoute.period, "period", cacheRoute.start));
-  return true;
+  if (writeCache()) {
+    if (cacheRoute.refresh) myCache.set(cacheRoute.id, info, setTTL(cacheRoute.refresh, "refresh"));else myCache.set(cacheRoute.id, info, setTTL(cacheRoute.period, "period", cacheRoute.start));
+    return true;
+  } else return false;
 }
 
 ; //---------------------------------------------FUNCTIONS--------------------------------------------------
@@ -157,10 +186,10 @@ var FBCache = {};
 /**
  * Inicialize FBCache
  *
- * @param   {Object}            config          Config object with the routes for the cache and the configuration data for the library
+ * @param   {object}            config          Config object with the routes for the cache and the configuration data for the library
  * @param   {string}            url             Firebase project URL
  * @param   {string}            credentialType  Indicates the type of the credential to connect to the Firebase Project
- * @param   {string || Object}  credential      Credential to connect to the Firebase Project
+ * @param   {string || object}  credential      Credential to connect to the Firebase Project
  *
  * @return  {void}                              
  */
@@ -173,8 +202,17 @@ FBCache.init = function (config, url, credentialType, credential) {
   if (config.read_only || config.read_only === undefined) routes.read_only = true;else routes.read_only = false;
   if (config.realtime) routes.realtime = getRoutes(config.realtime);
   if (config.firestore) routes.firestore = getRoutes(config.firestore);
-  if (config.max_size) routes.max_size = config.max_size;
+  if (config.max_size) routes.max_size = setMaxSize(config.max_size);
 };
+/**
+ * Method to make a query to Real Time Database or Firestore, if the path is specified to make a cache, it is about consulting the cache, in case the information is expired or the path is not specified, it will be done a query to Firebase
+ *
+ * @param   {string}  dbms   Indicates if you want to make a query to Real Time Database or Firestore
+ * @param   {string}  route  Route to be consulted
+ *
+ * @return  {object}         Query result, along with indicators on whether or not the cache was queried, or refreshed
+ */
+
 
 FBCache.get = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dbms, route) {
@@ -329,6 +367,104 @@ FBCache.get = /*#__PURE__*/function () {
 
   return function (_x, _x2) {
     return _ref.apply(this, arguments);
+  };
+}();
+
+FBCache.insert = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dbms, route, data, id) {
+    var cacheRoute, childRef, child, collection, generateID;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            cacheRoute = null;
+            childRef = null;
+            child = null;
+            collection = null;
+            generateID = null;
+            _context2.t0 = dbms;
+            _context2.next = _context2.t0 === service.REAL_TIME ? 8 : _context2.t0 === service.FIRESTORE ? 23 : 35;
+            break;
+
+          case 8:
+            if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
+
+            if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
+              _context2.next = 11;
+              break;
+            }
+
+            throw new Error("the path was specified as read-only");
+
+          case 11:
+            if (!id) {
+              _context2.next = 18;
+              break;
+            }
+
+            childRef = rtdb.ref(route);
+            child = childRef.child(id);
+            _context2.next = 16;
+            return child.set(data);
+
+          case 16:
+            _context2.next = 22;
+            break;
+
+          case 18:
+            childRef = rtdb.ref();
+            child = childRef.child(route);
+            _context2.next = 22;
+            return child.push(data);
+
+          case 22:
+            return _context2.abrupt("break", 36);
+
+          case 23:
+            if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
+
+            if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
+              _context2.next = 26;
+              break;
+            }
+
+            throw new Error("the path was specified as read-only");
+
+          case 26:
+            collection = firestore.collection(route);
+
+            if (!id) {
+              _context2.next = 32;
+              break;
+            }
+
+            _context2.next = 30;
+            return collection.doc(id).set(data);
+
+          case 30:
+            _context2.next = 34;
+            break;
+
+          case 32:
+            _context2.next = 34;
+            return collection.add(data);
+
+          case 34:
+            return _context2.abrupt("break", 36);
+
+          case 35:
+            throw new Error("dbms value invalid");
+
+          case 36:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function (_x3, _x4, _x5, _x6) {
+    return _ref2.apply(this, arguments);
   };
 }(); //--------------------------------------------FBCACHE METHODS---------------------------------------------
 //------------------------------------------------EXPORTS-------------------------------------------------
