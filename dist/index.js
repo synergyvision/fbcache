@@ -226,14 +226,14 @@ FBCache.get = /*#__PURE__*/function () {
             infoDB = [];
             updateCache = false;
             _context.t0 = dbms;
-            _context.next = _context.t0 === service.REAL_TIME ? 7 : _context.t0 === service.FIRESTORE ? 27 : 48;
+            _context.next = _context.t0 === service.REAL_TIME ? 7 : _context.t0 === service.FIRESTORE ? 24 : 45;
             break;
 
           case 7:
             if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context.next = 21;
+              _context.next = 19;
               break;
             }
 
@@ -252,53 +252,51 @@ FBCache.get = /*#__PURE__*/function () {
           case 14:
             _context.next = 16;
             return rtdb.ref(route).once('value', function (snapshot) {
-              return snapshot.val();
+              infoDB = snapshot.val();
+              updateCache = setCache(cacheRoute, snapshot.val());
             });
 
           case 16:
-            infoDB = _context.sent;
-            updateCache = setCache(cacheRoute, infoDB);
             return _context.abrupt("return", {
               data: infoDB,
               cache: false,
               startCache: updateCache
             });
 
-          case 19:
-            _context.next = 25;
+          case 17:
+            _context.next = 22;
             break;
 
-          case 21:
-            _context.next = 23;
+          case 19:
+            _context.next = 21;
             return rtdb.ref(route).once('value', function (snapshot) {
-              return snapshot.val();
+              infoDB = snapshot.val();
             });
 
-          case 23:
-            infoDB = _context.sent;
+          case 21:
             return _context.abrupt("return", {
               data: infoDB,
               cache: false,
               startCache: false
             });
 
-          case 25:
+          case 22:
             ;
-            return _context.abrupt("break", 49);
+            return _context.abrupt("break", 46);
 
-          case 27:
+          case 24:
             collection = null;
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context.next = 42;
+              _context.next = 39;
               break;
             }
 
             infoCache = myCache.get(cacheRoute.id);
 
             if (!infoCache) {
-              _context.next = 35;
+              _context.next = 32;
               break;
             }
 
@@ -307,9 +305,9 @@ FBCache.get = /*#__PURE__*/function () {
               cache: true
             });
 
-          case 35:
+          case 32:
             collection = firestore.collection(route);
-            _context.next = 38;
+            _context.next = 35;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -319,7 +317,7 @@ FBCache.get = /*#__PURE__*/function () {
               });
             });
 
-          case 38:
+          case 35:
             updateCache = setCache(cacheRoute, infoDB);
             return _context.abrupt("return", {
               data: infoDB,
@@ -327,13 +325,13 @@ FBCache.get = /*#__PURE__*/function () {
               startCache: updateCache
             });
 
-          case 40:
-            _context.next = 46;
+          case 37:
+            _context.next = 43;
             break;
 
-          case 42:
+          case 39:
             collection = firestore.collection(route);
-            _context.next = 45;
+            _context.next = 42;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -343,21 +341,21 @@ FBCache.get = /*#__PURE__*/function () {
               });
             });
 
-          case 45:
+          case 42:
             return _context.abrupt("return", {
               data: infoDB,
               cache: false,
               startCache: false
             });
 
-          case 46:
+          case 43:
             ;
-            return _context.abrupt("break", 49);
+            return _context.abrupt("break", 46);
 
-          case 48:
+          case 45:
             throw new Error("dbms value invalid");
 
-          case 49:
+          case 46:
           case "end":
             return _context.stop();
         }
