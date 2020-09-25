@@ -41,21 +41,18 @@ _credential_ es la credencial con la que se quiere autenticar a Firebase, puede 
 ### Consulta a Real Time Database o Firestore
 
 ```
-FBCache.get( dbms, name, conditions )
+FBCache.get( dbms, name )
 ```
 
 - Parámetros
   - dbms (string): Nombre del manejador de base de datos a donde se vaya a consultar
   - name (string): Nombre del child o colección a consultar
-  - conditions (object): Condiciones que se quieran aplicar para que saber que registros se retornan y cuales no (OPCIONAL) (si no se especifican condiciones, se retornan todos los registros almacenados)
-
-**NOTA**: La estructura del objeto conditions se esta definiendo todavía
 
 - Respuesta
 Este método retornará un objeto con las siguientes características
 ```
 {
-    data: Array con los datos solicitados,
+    data: Información extraida de Real Time Database o Firestore,
     fromCache: Boolean que indica si se realizo la consulta con la información en caché (true) o si no (false),
     updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
@@ -76,13 +73,14 @@ return
 ### Inserta datos a Real Time Database o Firestore
 
 ```
-FBCache.set( dbms, name, insertData )
+FBCache.set( dbms, name, insertData, id )
 ```
 
 - Parámetros
   - dbms (string): Nombre del manejador de base de datos a donde se vaya a insertar
   - name (string): Nombre del child o colección a donde se vaya a realizar la inserción
   - insertData (object): Objeto con la información a insertar
+  - id (string || number): Indica el id con el que se quiera guardar la información en Real Time Database o Firestore, si no se indica el manejador de base de datos asignará el id automaticamente
 
 - Respuesta
 Este método retornará un objeto con las siguientes características
@@ -95,7 +93,7 @@ Este método retornará un objeto con las siguientes características
 
 - Ejemplo:
 ```
-FBCache.set( 'Real Time Database', 'persons', { name: "Name", lastname: "Lastname" })
+FBCache.set( 'Real Time Database', 'persons', { name: "Name", lastname: "Lastname" } )
 
 return:
 {
@@ -107,16 +105,14 @@ return:
 ### Actualiza datos en Real Time Database o Firestore
 
 ```
-FBCache.set( dbms, name, updateData, conditions )
+FBCache.set( dbms, name, updateData, id )
 ```
 
 - Parámetros
   - dbms (string): Nombre del manejador de base de datos a donde se vaya a actualizar la información
   - name (string): Nombre del child o colección a donde se vaya a realizar la inserción
   - updateData (object): Objeto con la información que se quiere insertar para actualizar los registros
-  - conditions (object): Condiciones que se quieran aplicar para que saber que registros se actualizan y cuales no (OPCIONAL) (si no se especifican condiciones, se actualizan todos los registros almacenados)
-
-**NOTA**: La estructura del objeto conditions se esta definiendo todavía
+  - id (string || number): Indica el id con el que se quiera actualizar la información en Real Time Database o Firestore
 
 - Respuesta:
 Este método retornará un objeto con las siguientes características
@@ -129,7 +125,7 @@ Este método retornará un objeto con las siguientes características
 
 - Ejemplo:
 ```
-FBCache.update( 'Real Time Database', 'persons', { name: "Name", lastname: "Lastname" } )
+FBCache.update( 'Real Time Database', 'persons', { name: "Name", lastname: "Lastname" }, "qwerty" )
 
 return:
 {
@@ -141,15 +137,13 @@ return:
 ### Elimina datos en Real Time Database o Firestore
 
 ```
-FBCache.delete( dbms, name, conditions )
+FBCache.delete( dbms, name, id )
 ```
 
 - Parámetros
   - dbms (string): Nombre del manejador de base de datos a donde se vaya a eliminar
   - name (string): Nombre del child o colección donde se realizará la eliminación
-  - conditions (object): Condiciones que se quieran aplicar para que saber que registros se eliminan y cuales no (OPCIONAL) (si no se especifican condiciones, se eliminan todos los registros almacenados)
-
-**NOTA**: La estructura del objeto conditions se esta definiendo todavía
+  - id (string || number): Indica el id que se quiere eliminar en Real Time Database o Firestore, si no se indica el manejador de base de datos asignará el id automaticamente
 
 - Respuesta:
 Este método retornará un objeto con las siguientes características
@@ -162,7 +156,7 @@ Este método retornará un objeto con las siguientes características
 
 - Ejemplo:
 ```
-FBCache.delete( 'Firestore', 'users' )
+FBCache.delete( 'Firestore', 'users', "qwerty" )
 
 return:
 {
