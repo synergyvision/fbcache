@@ -325,7 +325,7 @@ function deleteCache(cacheRoute, dbms, id) {
     } else return false;
   } else return false;
 } //---------------------------------------------FUNCTIONS--------------------------------------------------
-//--------------------------------------------FBCACHE METHODS---------------------------------------------
+//--------------------------------------------FBCache METHODS---------------------------------------------
 
 
 var FBCache = {};
@@ -837,11 +837,90 @@ FBCache["delete"] = /*#__PURE__*/function () {
   return function (_x11, _x12, _x13) {
     return _ref4.apply(this, arguments);
   };
-}(); //--------------------------------------------FBCACHE METHODS---------------------------------------------
-//------------------------------------------------EXPORTS-------------------------------------------------
+}(); //--------------------------------------------FBCache METHODS---------------------------------------------
+//------------------------------------------------FBCACHE----------------------------------------------------
+
+
+function FBCacheR() {
+  var _this = this;
+
+  this.dbms = undefined, this.route = undefined, this.id = undefined, this.database = function () {
+    _this.dbms = service.REAL_TIME;
+    return _this;
+  }, this.ref = function (route) {
+    if (_this.dbms === service.REAL_TIME && route) {
+      _this.route = route;
+      return _this;
+    }
+  }, this.once = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            if (!(_this.dbms && _this.route)) {
+              _context5.next = 4;
+              break;
+            }
+
+            _context5.next = 3;
+            return FBCache.get(_this.dbms, _this.route);
+
+          case 3:
+            return _context5.abrupt("return", _context5.sent);
+
+          case 4:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  })), this.child = function (id) {
+    if (_this.dbms === service.REAL_TIME) {
+      if (_this.route) _this.id = id;else _this.route = id;
+      return _this;
+    }
+  }, this.set = /*#__PURE__*/function () {
+    var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(data) {
+      return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              if (!(_this.dbms === service.REAL_TIME && _this.route && _this.id && data)) {
+                _context6.next = 4;
+                break;
+              }
+
+              _context6.next = 3;
+              return FBCache.insert(_this.dbms, _this.route, data, _this.id);
+
+            case 3:
+              return _context6.abrupt("return", _context6.sent);
+
+            case 4:
+            case "end":
+              return _context6.stop();
+          }
+        }
+      }, _callee6);
+    }));
+
+    return function (_x14) {
+      return _ref6.apply(this, arguments);
+    };
+  }(), this.firestore = function () {
+    _this.dbms = service.FIRESTORE;
+    return _this;
+  }, this.collection = function (route) {
+    if (_this.dbms === service.FIRESTORE) {
+      _this.route = route;
+      return _this;
+    }
+  };
+} //------------------------------------------------FBCACHE----------------------------------------------------
 
 
 module.exports = {
+  service: service,
   FBCache: FBCache,
-  service: service
-}; //------------------------------------------------EXPORTS-------------------------------------------------
+  FBCacheR: FBCacheR
+};
