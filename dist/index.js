@@ -325,10 +325,8 @@ function deleteCache(cacheRoute, dbms, id) {
     } else return false;
   } else return false;
 } //---------------------------------------------FUNCTIONS--------------------------------------------------
-//--------------------------------------------FBCache METHODS---------------------------------------------
+//--------------------------------------------controller METHODS---------------------------------------------
 
-
-var FBCache = {};
 /**
  * Inicialize FBCache
  *
@@ -340,7 +338,8 @@ var FBCache = {};
  * @return  {void}                              
  */
 
-FBCache.init = function (config, url, credentialType, credential) {
+
+var initFBCache = function initFBCache(config, url, credentialType, credential) {
   if (!url) throw new Error("url is undefined");
   firebaseConection(url, credentialType, credential);
   rtdb = admin.database();
@@ -350,6 +349,8 @@ FBCache.init = function (config, url, credentialType, credential) {
   if (config.firestore) routes.firestore = getRoutes(config.firestore);
   if (config.max_size) routes.max_size = setMaxSize(config.max_size);
 };
+
+var controller = {};
 /**
  * Method to make a query to Real Time Database or Firestore, if the path is specified to make a cache, it is about consulting the cache, in case the information is expired or the path is not specified, it will be done a query to Firebase
  *
@@ -359,8 +360,7 @@ FBCache.init = function (config, url, credentialType, credential) {
  * @return  {object}         Query result, along with indicators on whether or not the cache was queried, or refreshed
  */
 
-
-FBCache.get = /*#__PURE__*/function () {
+controller.get = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dbms, route) {
     var cacheRoute, infoCache, infoDB, updateCache, collection;
     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -514,7 +514,7 @@ FBCache.get = /*#__PURE__*/function () {
   };
 }();
 
-FBCache.insert = /*#__PURE__*/function () {
+controller.insert = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dbms, route, data, id) {
     var cacheRoute, generateID, updateCache, routeInCache;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -643,7 +643,7 @@ FBCache.insert = /*#__PURE__*/function () {
   };
 }();
 
-FBCache.update = /*#__PURE__*/function () {
+controller.update = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(dbms, route, data, id) {
     var cacheRoute, updateCache, routeInCache;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
@@ -745,7 +745,7 @@ FBCache.update = /*#__PURE__*/function () {
   };
 }();
 
-FBCache["delete"] = /*#__PURE__*/function () {
+controller["delete"] = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(dbms, route, id) {
     var cacheRoute, updateCache, routeInCache;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
@@ -837,19 +837,21 @@ FBCache["delete"] = /*#__PURE__*/function () {
   return function (_x11, _x12, _x13) {
     return _ref4.apply(this, arguments);
   };
-}(); //--------------------------------------------FBCache METHODS---------------------------------------------
+}(); //--------------------------------------------controller METHODS---------------------------------------------
 //------------------------------------------------FBCACHE----------------------------------------------------
 
 
-function FBCacheR() {
+function FBCache() {
   var _this = this;
 
   this.dbms = undefined, this.route = undefined, this.id = undefined, this.database = function () {
     _this.dbms = service.REAL_TIME;
     return _this;
   }, this.ref = function (route) {
-    if (_this.dbms === service.REAL_TIME && route) _this.route = route;
-    return _this;
+    if (_this.dbms === service.REAL_TIME) {
+      _this.route = route;
+      return _this;
+    }
   }, this.once = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -861,7 +863,7 @@ function FBCacheR() {
             }
 
             _context5.next = 3;
-            return FBCache.get(_this.dbms, _this.route);
+            return controller.get(_this.dbms, _this.route);
 
           case 3:
             return _context5.abrupt("return", _context5.sent);
@@ -883,13 +885,13 @@ function FBCacheR() {
         while (1) {
           switch (_context6.prev = _context6.next) {
             case 0:
-              if (!(_this.dbms === service.REAL_TIME && _this.route && _this.id && data)) {
+              if (!(_this.dbms && _this.route && _this.id && data)) {
                 _context6.next = 4;
                 break;
               }
 
               _context6.next = 3;
-              return FBCache.insert(_this.dbms, _this.route, data, _this.id);
+              return controller.insert(_this.dbms, _this.route, data, _this.id);
 
             case 3:
               return _context6.abrupt("return", _context6.sent);
@@ -917,7 +919,7 @@ function FBCacheR() {
               }
 
               _context7.next = 3;
-              return FBCache.insert(_this.dbms, _this.route, data);
+              return controller.insert(_this.dbms, _this.route, data);
 
             case 3:
               return _context7.abrupt("return", _context7.sent);
@@ -945,7 +947,7 @@ function FBCacheR() {
               }
 
               _context8.next = 3;
-              return FBCache.update(_this.dbms, _this.route, data, _this.id);
+              return controller.update(_this.dbms, _this.route, data, _this.id);
 
             case 3:
               return _context8.abrupt("return", _context8.sent);
@@ -961,8 +963,7 @@ function FBCacheR() {
     return function (_x16) {
       return _ref8.apply(this, arguments);
     };
-  }();
-  this.remove = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+  }(), this.remove = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
@@ -973,7 +974,7 @@ function FBCacheR() {
             }
 
             _context9.next = 3;
-            return FBCache["delete"](_this.dbms, _this.route, _this.id);
+            return controller["delete"](_this.dbms, _this.route, _this.id);
 
           case 3:
             return _context9.abrupt("return", _context9.sent);
@@ -984,8 +985,7 @@ function FBCacheR() {
         }
       }
     }, _callee9);
-  }));
-  this.firestore = function () {
+  })), this.firestore = function () {
     _this.dbms = service.FIRESTORE;
     return _this;
   }, this.collection = function (route) {
@@ -993,12 +993,88 @@ function FBCacheR() {
       _this.route = route;
       return _this;
     }
-  };
+  }, this.get = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            if (!(_this.dbms === service.FIRESTORE && _this.route)) {
+              _context10.next = 4;
+              break;
+            }
+
+            _context10.next = 3;
+            return controller.get(_this.dbms, _this.route);
+
+          case 3:
+            return _context10.abrupt("return", _context10.sent);
+
+          case 4:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    }, _callee10);
+  })), this.doc = function (id) {
+    if (_this.dbms === service.FIRESTORE && _this.route) {
+      _this.id = id;
+      return _this;
+    }
+  }, this.add = /*#__PURE__*/function () {
+    var _ref11 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee11(data) {
+      return regeneratorRuntime.wrap(function _callee11$(_context11) {
+        while (1) {
+          switch (_context11.prev = _context11.next) {
+            case 0:
+              if (!(_this.dbms === service.FIRESTORE && _this.route)) {
+                _context11.next = 4;
+                break;
+              }
+
+              _context11.next = 3;
+              return controller.insert(_this.dbms, _this.route, data);
+
+            case 3:
+              return _context11.abrupt("return", _context11.sent);
+
+            case 4:
+            case "end":
+              return _context11.stop();
+          }
+        }
+      }, _callee11);
+    }));
+
+    return function (_x17) {
+      return _ref11.apply(this, arguments);
+    };
+  }(), this["delete"] = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12() {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            if (!(_this.dbms === service.FIRESTORE && _this.route && _this.id)) {
+              _context12.next = 4;
+              break;
+            }
+
+            _context12.next = 3;
+            return controller["delete"](_this.dbms, _this.route, _this.id);
+
+          case 3:
+            return _context12.abrupt("return", _context12.sent);
+
+          case 4:
+          case "end":
+            return _context12.stop();
+        }
+      }
+    }, _callee12);
+  }));
 } //------------------------------------------------FBCACHE----------------------------------------------------
 
 
 module.exports = {
-  service: service,
   FBCache: FBCache,
-  FBCacheR: FBCacheR
+  initFBCache: initFBCache
 };
