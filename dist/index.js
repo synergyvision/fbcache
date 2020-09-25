@@ -848,10 +848,8 @@ function FBCacheR() {
     _this.dbms = service.REAL_TIME;
     return _this;
   }, this.ref = function (route) {
-    if (_this.dbms === service.REAL_TIME && route) {
-      _this.route = route;
-      return _this;
-    }
+    if (_this.dbms === service.REAL_TIME && route) _this.route = route;
+    return _this;
   }, this.once = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -907,7 +905,87 @@ function FBCacheR() {
     return function (_x14) {
       return _ref6.apply(this, arguments);
     };
-  }(), this.firestore = function () {
+  }(), this.push = /*#__PURE__*/function () {
+    var _ref7 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(data) {
+      return regeneratorRuntime.wrap(function _callee7$(_context7) {
+        while (1) {
+          switch (_context7.prev = _context7.next) {
+            case 0:
+              if (!(_this.dbms === service.REAL_TIME && _this.route)) {
+                _context7.next = 4;
+                break;
+              }
+
+              _context7.next = 3;
+              return FBCache.insert(_this.dbms, _this.route, data);
+
+            case 3:
+              return _context7.abrupt("return", _context7.sent);
+
+            case 4:
+            case "end":
+              return _context7.stop();
+          }
+        }
+      }, _callee7);
+    }));
+
+    return function (_x15) {
+      return _ref7.apply(this, arguments);
+    };
+  }(), this.update = /*#__PURE__*/function () {
+    var _ref8 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(data) {
+      return regeneratorRuntime.wrap(function _callee8$(_context8) {
+        while (1) {
+          switch (_context8.prev = _context8.next) {
+            case 0:
+              if (!(_this.dbms && _this.route && _this.id)) {
+                _context8.next = 4;
+                break;
+              }
+
+              _context8.next = 3;
+              return FBCache.update(_this.dbms, _this.route, data, _this.id);
+
+            case 3:
+              return _context8.abrupt("return", _context8.sent);
+
+            case 4:
+            case "end":
+              return _context8.stop();
+          }
+        }
+      }, _callee8);
+    }));
+
+    return function (_x16) {
+      return _ref8.apply(this, arguments);
+    };
+  }();
+  this.remove = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            if (!(_this.dbms === service.REAL_TIME && _this.route && _this.id)) {
+              _context9.next = 4;
+              break;
+            }
+
+            _context9.next = 3;
+            return FBCache["delete"](_this.dbms, _this.route, _this.id);
+
+          case 3:
+            return _context9.abrupt("return", _context9.sent);
+
+          case 4:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  this.firestore = function () {
     _this.dbms = service.FIRESTORE;
     return _this;
   }, this.collection = function (route) {
