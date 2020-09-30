@@ -42,7 +42,7 @@ describe("Test get FBCache", () => {
         }, config.URL, "file", firebaseCredential);
     });
 
-    test("fail - dont call database()", async () => {
+    test("fail - dont call database() - realtime", async () => {
         let fbc = new FBCache();
         try {
             await fbc.ref(realtimeRoute).once();
@@ -51,7 +51,25 @@ describe("Test get FBCache", () => {
         }
     });
 
-    test("fail - dont call firestore()", async () => {
+    test("fail - dont call ref() - realtime", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.database().once();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without reference a child in Real Time Database")
+        }
+    });
+
+    test("fail - call only once() - realtime", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.once();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without reference a child in Real Time Database")
+        }
+    });
+
+    test("fail - dont call firestore() - firestore", async () => {
         let fbc = new FBCache();
         try {
             await fbc.collection(firestoreRoute).get();

@@ -340,16 +340,55 @@ var controller = {};
  * @return  {void}                              
  */
 
-controller.init = function (config, url, credentialType, credential) {
-  if (!url) throw new Error("url is undefined");
-  firebaseConection(url, credentialType, credential);
-  rtdb = admin.database();
-  firestore = admin.firestore();
-  if (config.read_only || config.read_only === undefined) routes.read_only = true;else routes.read_only = false;
-  if (config.realtime) routes.realtime = getRoutes(config.realtime);
-  if (config.firestore) routes.firestore = getRoutes(config.firestore);
-  if (config.max_size) routes.max_size = setMaxSize(config.max_size);
-};
+controller.init = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(config, url, credentialType, credential) {
+    var response;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            response = {
+              success: false
+            };
+
+            if (url) {
+              _context.next = 3;
+              break;
+            }
+
+            throw new Error("url is undefined");
+
+          case 3:
+            if (config) {
+              _context.next = 5;
+              break;
+            }
+
+            throw new Error("config can't be null or undefined");
+
+          case 5:
+            if (config.read_only || config.read_only === undefined) routes.read_only = true;else routes.read_only = false;
+            if (config.realtime) routes.realtime = getRoutes(config.realtime);
+            if (config.firestore) routes.firestore = getRoutes(config.firestore);
+            if (config.max_size) routes.max_size = setMaxSize(config.max_size);
+            firebaseConection(url, credentialType, credential);
+            rtdb = admin.database();
+            firestore = admin.firestore();
+            response.success = true;
+            return _context.abrupt("return", response);
+
+          case 14:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function (_x, _x2, _x3, _x4) {
+    return _ref.apply(this, arguments);
+  };
+}();
 /**
  * Method to make a query to Real Time Database or Firestore, if the path is specified to make a cache, it is about consulting the cache, in case the information is expired or the path is not specified, it will be done a query to Firebase
  *
@@ -361,66 +400,66 @@ controller.init = function (config, url, credentialType, credential) {
 
 
 controller.get = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dbms, route) {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dbms, route) {
     var cacheRoute, infoCache, infoDB, updateCache, collection;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
             cacheRoute = null;
             infoCache = null;
             infoDB = [];
             updateCache = false;
-            _context.t0 = dbms;
-            _context.next = _context.t0 === service.REAL_TIME ? 7 : _context.t0 === service.FIRESTORE ? 24 : 45;
+            _context2.t0 = dbms;
+            _context2.next = _context2.t0 === service.REAL_TIME ? 7 : _context2.t0 === service.FIRESTORE ? 24 : 45;
             break;
 
           case 7:
             if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context.next = 19;
+              _context2.next = 19;
               break;
             }
 
             infoCache = myCache.get(cacheRoute.id);
 
             if (!infoCache) {
-              _context.next = 14;
+              _context2.next = 14;
               break;
             }
 
-            return _context.abrupt("return", {
+            return _context2.abrupt("return", {
               info: infoCache,
               cache: true
             });
 
           case 14:
-            _context.next = 16;
+            _context2.next = 16;
             return rtdb.ref(route).once('value', function (snapshot) {
               infoDB = snapshot.val();
               updateCache = setCache(cacheRoute, snapshot.val());
             });
 
           case 16:
-            return _context.abrupt("return", {
+            return _context2.abrupt("return", {
               info: infoDB,
               cache: false,
               startCache: updateCache
             });
 
           case 17:
-            _context.next = 22;
+            _context2.next = 22;
             break;
 
           case 19:
-            _context.next = 21;
+            _context2.next = 21;
             return rtdb.ref(route).once('value', function (snapshot) {
               infoDB = snapshot.val();
             });
 
           case 21:
-            return _context.abrupt("return", {
+            return _context2.abrupt("return", {
               info: infoDB,
               cache: false,
               startCache: false
@@ -428,32 +467,32 @@ controller.get = /*#__PURE__*/function () {
 
           case 22:
             ;
-            return _context.abrupt("break", 46);
+            return _context2.abrupt("break", 46);
 
           case 24:
             collection = null;
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context.next = 39;
+              _context2.next = 39;
               break;
             }
 
             infoCache = myCache.get(cacheRoute.id);
 
             if (!infoCache) {
-              _context.next = 32;
+              _context2.next = 32;
               break;
             }
 
-            return _context.abrupt("return", {
+            return _context2.abrupt("return", {
               info: infoCache,
               cache: true
             });
 
           case 32:
             collection = firestore.collection(route);
-            _context.next = 35;
+            _context2.next = 35;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -465,19 +504,19 @@ controller.get = /*#__PURE__*/function () {
 
           case 35:
             updateCache = setCache(cacheRoute, infoDB);
-            return _context.abrupt("return", {
+            return _context2.abrupt("return", {
               info: infoDB,
               cache: false,
               startCache: updateCache
             });
 
           case 37:
-            _context.next = 43;
+            _context2.next = 43;
             break;
 
           case 39:
             collection = firestore.collection(route);
-            _context.next = 42;
+            _context2.next = 42;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -488,7 +527,7 @@ controller.get = /*#__PURE__*/function () {
             });
 
           case 42:
-            return _context.abrupt("return", {
+            return _context2.abrupt("return", {
               info: infoDB,
               cache: false,
               startCache: false
@@ -496,141 +535,12 @@ controller.get = /*#__PURE__*/function () {
 
           case 43:
             ;
-            return _context.abrupt("break", 46);
+            return _context2.abrupt("break", 46);
 
           case 45:
             throw new Error("dbms value invalid");
 
           case 46:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-
-  return function (_x, _x2) {
-    return _ref.apply(this, arguments);
-  };
-}();
-
-controller.insert = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dbms, route, data, id) {
-    var cacheRoute, generateID, updateCache, routeInCache;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            if (route) {
-              _context2.next = 2;
-              break;
-            }
-
-            throw new Error("route can't be null or undefined");
-
-          case 2:
-            if (!(!data || Object.entries(data).length === 0 || data === [])) {
-              _context2.next = 4;
-              break;
-            }
-
-            throw new Error("data can't be null or undefined");
-
-          case 4:
-            cacheRoute = null;
-            generateID = null;
-            updateCache = false;
-            routeInCache = false;
-            _context2.t0 = dbms;
-            _context2.next = _context2.t0 === service.REAL_TIME ? 11 : _context2.t0 === service.FIRESTORE ? 25 : 39;
-            break;
-
-          case 11:
-            if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
-
-            if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context2.next = 14;
-              break;
-            }
-
-            throw new Error("the path was specified as read-only");
-
-          case 14:
-            if (!id) {
-              _context2.next = 19;
-              break;
-            }
-
-            _context2.next = 17;
-            return rtdb.ref(route).child(id).set(data);
-
-          case 17:
-            _context2.next = 22;
-            break;
-
-          case 19:
-            _context2.next = 21;
-            return rtdb.ref().child(route).push(data);
-
-          case 21:
-            generateID = _context2.sent;
-
-          case 22:
-            if (cacheRoute) {
-              routeInCache = true;
-              updateCache = insertCache(cacheRoute, service.REAL_TIME, data, id ? id : generateID.key);
-            }
-
-            return _context2.abrupt("return", {
-              routeInConfig: routeInCache,
-              updateCache: updateCache
-            });
-
-          case 25:
-            if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
-
-            if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context2.next = 28;
-              break;
-            }
-
-            throw new Error("the path was specified as read-only");
-
-          case 28:
-            if (!id) {
-              _context2.next = 33;
-              break;
-            }
-
-            _context2.next = 31;
-            return firestore.collection(route).doc(id).set(data);
-
-          case 31:
-            _context2.next = 36;
-            break;
-
-          case 33:
-            _context2.next = 35;
-            return firestore.collection(route).add(data);
-
-          case 35:
-            generateID = _context2.sent;
-
-          case 36:
-            if (cacheRoute) {
-              routeInCache = true;
-              updateCache = insertCache(cacheRoute, service.FIRESTORE, data, id ? id : generateID.id);
-            }
-
-            return _context2.abrupt("return", {
-              routeInConfig: routeInCache,
-              updateCache: updateCache
-            });
-
-          case 39:
-            throw new Error("dbms value invalid");
-
-          case 40:
           case "end":
             return _context2.stop();
         }
@@ -638,14 +548,14 @@ controller.insert = /*#__PURE__*/function () {
     }, _callee2);
   }));
 
-  return function (_x3, _x4, _x5, _x6) {
+  return function (_x5, _x6) {
     return _ref2.apply(this, arguments);
   };
 }();
 
-controller.update = /*#__PURE__*/function () {
+controller.insert = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(dbms, route, data, id) {
-    var cacheRoute, updateCache, routeInCache;
+    var cacheRoute, generateID, updateCache, routeInCache;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -666,39 +576,48 @@ controller.update = /*#__PURE__*/function () {
             throw new Error("data can't be null or undefined");
 
           case 4:
-            if (id) {
-              _context3.next = 6;
-              break;
-            }
-
-            throw new Error("id can't be null or undefined");
-
-          case 6:
             cacheRoute = null;
+            generateID = null;
             updateCache = false;
             routeInCache = false;
             _context3.t0 = dbms;
-            _context3.next = _context3.t0 === service.REAL_TIME ? 12 : _context3.t0 === service.FIRESTORE ? 20 : 27;
+            _context3.next = _context3.t0 === service.REAL_TIME ? 11 : _context3.t0 === service.FIRESTORE ? 25 : 39;
             break;
 
-          case 12:
+          case 11:
             if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context3.next = 15;
+              _context3.next = 14;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 15:
+          case 14:
+            if (!id) {
+              _context3.next = 19;
+              break;
+            }
+
             _context3.next = 17;
-            return rtdb.ref(route).child(id).update(data);
+            return rtdb.ref(route).child(id).set(data);
 
           case 17:
+            _context3.next = 22;
+            break;
+
+          case 19:
+            _context3.next = 21;
+            return rtdb.ref().child(route).push(data);
+
+          case 21:
+            generateID = _context3.sent;
+
+          case 22:
             if (cacheRoute) {
               routeInCache = true;
-              updateCache = updateCacheInfo(cacheRoute, service.REAL_TIME, data, id);
+              updateCache = insertCache(cacheRoute, service.REAL_TIME, data, id ? id : generateID.key);
             }
 
             return _context3.abrupt("return", {
@@ -706,22 +625,40 @@ controller.update = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 20:
+          case 25:
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context3.next = 23;
+              _context3.next = 28;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 23:
-            firestore.collection(route).doc(id).update(data);
+          case 28:
+            if (!id) {
+              _context3.next = 33;
+              break;
+            }
 
+            _context3.next = 31;
+            return firestore.collection(route).doc(id).set(data);
+
+          case 31:
+            _context3.next = 36;
+            break;
+
+          case 33:
+            _context3.next = 35;
+            return firestore.collection(route).add(data);
+
+          case 35:
+            generateID = _context3.sent;
+
+          case 36:
             if (cacheRoute) {
               routeInCache = true;
-              updateCache = updateCacheInfo(cacheRoute, service.FIRESTORE, data, id);
+              updateCache = insertCache(cacheRoute, service.FIRESTORE, data, id ? id : generateID.id);
             }
 
             return _context3.abrupt("return", {
@@ -729,10 +666,10 @@ controller.update = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 27:
+          case 39:
             throw new Error("dbms value invalid");
 
-          case 28:
+          case 40:
           case "end":
             return _context3.stop();
         }
@@ -745,8 +682,8 @@ controller.update = /*#__PURE__*/function () {
   };
 }();
 
-controller["delete"] = /*#__PURE__*/function () {
-  var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(dbms, route, id) {
+controller.update = /*#__PURE__*/function () {
+  var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(dbms, route, data, id) {
     var cacheRoute, updateCache, routeInCache;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -760,8 +697,110 @@ controller["delete"] = /*#__PURE__*/function () {
             throw new Error("route can't be null or undefined");
 
           case 2:
-            if (id) {
+            if (!(!data || Object.entries(data).length === 0 || data === [])) {
               _context4.next = 4;
+              break;
+            }
+
+            throw new Error("data can't be null or undefined");
+
+          case 4:
+            if (id) {
+              _context4.next = 6;
+              break;
+            }
+
+            throw new Error("id can't be null or undefined");
+
+          case 6:
+            cacheRoute = null;
+            updateCache = false;
+            routeInCache = false;
+            _context4.t0 = dbms;
+            _context4.next = _context4.t0 === service.REAL_TIME ? 12 : _context4.t0 === service.FIRESTORE ? 20 : 27;
+            break;
+
+          case 12:
+            if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
+
+            if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
+              _context4.next = 15;
+              break;
+            }
+
+            throw new Error("the path was specified as read-only");
+
+          case 15:
+            _context4.next = 17;
+            return rtdb.ref(route).child(id).update(data);
+
+          case 17:
+            if (cacheRoute) {
+              routeInCache = true;
+              updateCache = updateCacheInfo(cacheRoute, service.REAL_TIME, data, id);
+            }
+
+            return _context4.abrupt("return", {
+              routeInConfig: routeInCache,
+              updateCache: updateCache
+            });
+
+          case 20:
+            if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
+
+            if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
+              _context4.next = 23;
+              break;
+            }
+
+            throw new Error("the path was specified as read-only");
+
+          case 23:
+            firestore.collection(route).doc(id).update(data);
+
+            if (cacheRoute) {
+              routeInCache = true;
+              updateCache = updateCacheInfo(cacheRoute, service.FIRESTORE, data, id);
+            }
+
+            return _context4.abrupt("return", {
+              routeInConfig: routeInCache,
+              updateCache: updateCache
+            });
+
+          case 27:
+            throw new Error("dbms value invalid");
+
+          case 28:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+
+  return function (_x11, _x12, _x13, _x14) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+controller["delete"] = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(dbms, route, id) {
+    var cacheRoute, updateCache, routeInCache;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            if (route) {
+              _context5.next = 2;
+              break;
+            }
+
+            throw new Error("route can't be null or undefined");
+
+          case 2:
+            if (id) {
+              _context5.next = 4;
               break;
             }
 
@@ -771,22 +810,22 @@ controller["delete"] = /*#__PURE__*/function () {
             cacheRoute = null;
             updateCache = false;
             routeInCache = false;
-            _context4.t0 = dbms;
-            _context4.next = _context4.t0 === service.REAL_TIME ? 10 : _context4.t0 === service.FIRESTORE ? 18 : 25;
+            _context5.t0 = dbms;
+            _context5.next = _context5.t0 === service.REAL_TIME ? 10 : _context5.t0 === service.FIRESTORE ? 18 : 25;
             break;
 
           case 10:
             if (routes.realtime) cacheRoute = routes.realtime.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context4.next = 13;
+              _context5.next = 13;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
           case 13:
-            _context4.next = 15;
+            _context5.next = 15;
             return rtdb.ref(route).child(id).remove();
 
           case 15:
@@ -795,7 +834,7 @@ controller["delete"] = /*#__PURE__*/function () {
               updateCache = deleteCache(cacheRoute, service.REAL_TIME, id);
             }
 
-            return _context4.abrupt("return", {
+            return _context5.abrupt("return", {
               routeInConfig: routeInCache,
               updateCache: updateCache
             });
@@ -804,7 +843,7 @@ controller["delete"] = /*#__PURE__*/function () {
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context4.next = 21;
+              _context5.next = 21;
               break;
             }
 
@@ -818,7 +857,7 @@ controller["delete"] = /*#__PURE__*/function () {
               updateCache = deleteCache(cacheRoute, service.FIRESTORE, id);
             }
 
-            return _context4.abrupt("return", {
+            return _context5.abrupt("return", {
               routeInConfig: routeInCache,
               updateCache: updateCache
             });
@@ -828,14 +867,14 @@ controller["delete"] = /*#__PURE__*/function () {
 
           case 26:
           case "end":
-            return _context4.stop();
+            return _context5.stop();
         }
       }
-    }, _callee4);
+    }, _callee5);
   }));
 
-  return function (_x11, _x12, _x13) {
-    return _ref4.apply(this, arguments);
+  return function (_x15, _x16, _x17) {
+    return _ref5.apply(this, arguments);
   };
 }(); //--------------------------------------------controller METHODS---------------------------------------------
 

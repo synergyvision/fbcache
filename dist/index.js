@@ -17,12 +17,14 @@ function FBCache() {
       _this.route = route;
       return _this;
     }
+
+    throw new Error("You cannot call this method without first declaring Real Time Database as DBMS");
   }, this.once = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            if (!(_this.dbms && _this.route)) {
+            if (!(_this.dbms === _fbcache.service.REAL_TIME && _this.route)) {
               _context.next = 4;
               break;
             }
@@ -34,6 +36,9 @@ function FBCache() {
             return _context.abrupt("return", _context.sent);
 
           case 4:
+            throw new Error("You cannot call this method without reference a child in Real Time Database");
+
+          case 5:
           case "end":
             return _context.stop();
         }
@@ -158,6 +163,8 @@ function FBCache() {
       _this.route = route;
       return _this;
     }
+
+    throw new Error("You cannot call this method without first declaring Firestore as DBMS");
   }, this.get = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -238,8 +245,30 @@ function FBCache() {
   }));
 }
 
-function initFBCache(config, url, credentialType, credential) {
-  _fbcache.controller.init(config, url, credentialType, credential);
+function initFBCache(_x5, _x6, _x7, _x8) {
+  return _initFBCache.apply(this, arguments);
+}
+
+function _initFBCache() {
+  _initFBCache = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(config, url, credentialType, credential) {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            _context9.next = 2;
+            return _fbcache.controller.init(config, url, credentialType, credential);
+
+          case 2:
+            return _context9.abrupt("return", _context9.sent);
+
+          case 3:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return _initFBCache.apply(this, arguments);
 }
 
 module.exports = {

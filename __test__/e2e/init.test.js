@@ -72,6 +72,22 @@ describe("Test initFBCache", () => {
         }
     });
 
+    test("fail - wrong credentialType", async () => {
+        try{
+            await initFBCache(fbcacheConfig, config.URL, "fil", firebaseCredential);
+        } catch (error) {
+            expect(error.message).toBe("fil is not a valid value for credentialType")
+        }
+    });
+
+    test("fail - wrong credential", async () => {
+        try{
+            await initFBCache(fbcacheConfig, config.URL, "file", {});
+        } catch (error) {
+            expect(error.message).toBe("Service account object must contain a string \"project_id\" property.")
+        }
+    });
+
     test("success", async () => {
         const resp = await initFBCache(fbcacheConfig, config.URL, "file", firebaseCredential);
         expect(resp).toStrictEqual({ success: true })
