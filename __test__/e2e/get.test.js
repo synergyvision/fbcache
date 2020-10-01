@@ -78,6 +78,24 @@ describe("Test get FBCache", () => {
         }
     });
 
+    test("fail - only call get() - firestore", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.get();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Firestore as DBMS or a collection")
+        }
+    });
+
+    test("fail - only call doc() - firestore", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.doc();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Firestore as DBMS or a collection")
+        }
+    });
+
     test("success - get from Real Time Database", async () => {
         let fbc = new FBCache();
         const resp1 = await fbc.database().ref(realtimeRoute).once();

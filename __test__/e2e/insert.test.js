@@ -42,6 +42,93 @@ describe("Test insert FBCache", () => {
         }, config.URL, "file", firebaseCredential);
     });
 
+    test("fail - call child() without the previously call to database().ref() - realtime", () => {
+        let fbc = new FBCache();
+        try {
+            fbc.child().set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Real Time Database as DBMS")
+        }
+    });
+
+    test("fail - call child() with firestore()", () => {
+        let fbc = new FBCache();
+        try {
+            fbc.firestore().child().set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Real Time Database as DBMS")
+        }
+    });
+
+    test("fail - call set() without dbms", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring a DBMS");
+        }
+    });
+
+    test("fail - call set() without ref() or collection()", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.database().set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("route or collection not indicated");
+        }
+        try {
+            await fbc.firestore().set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("route or collection not indicated");
+        }
+    });
+
+    test("fail - call set() without child() or doc()", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.database().ref(realtimeRoute).set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("child or doc not indicated");
+        }
+        try {
+            await fbc.firestore().collection(firestoreRoute).set({ name: "Test" });
+        } catch (error) {
+            expect(error.message).toBe("child or doc not indicated");
+        }
+    });
+
+    test("fail - call set() without data", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.database().ref(realtimeRoute).child("test").set();
+        } catch (error) {
+            expect(error.message).toBe("data can't be null or undefined");
+        }
+        try {
+            await fbc.firestore().collection(firestoreRoute).doc("test").set({});
+        } catch (error) {
+            expect(error.message).toBe("data can't be null or undefined");
+        }
+    });
+
+    test("fail - call add() alone", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.add();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Firestore as DBMS or a collection");
+        }
+    });
+
+    test("fail - call push() alone", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.push();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Firestore as DBMS or a collection");
+        }
+    });
+
     test("success - inserts in Real Time Database", async () => {
         let fbc = new FBCache();
         const resp1 = await fbc.database().ref(realtimeRoute).child("test").set({ name: "Test" });

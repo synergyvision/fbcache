@@ -42,6 +42,29 @@ describe("Test insert FBCache", () => {
         }, config.URL, "file", firebaseCredential);
     });
 
+    test("fail - call only update()", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.update();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring a DBMS or reference a route for update");
+        }
+    });
+
+    test("fail - call update() without data", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.database().ref(realtimeRoute).child("test").update()
+        } catch (error) {
+            expect(error.message).toBe("data can't be null or undefined");
+        }
+        try {
+            await fbc.firestore().collection(firestoreRoute).doc("test").update();
+        } catch (error) {
+            expect(error.message).toBe("data can't be null or undefined");
+        }
+    });
+
     test("success - update in Real Time Database", async () => {
         let fbc = new FBCache();
         await fbc.database().ref(realtimeRoute).child("test").set({ name: "Test" });
@@ -54,14 +77,14 @@ describe("Test insert FBCache", () => {
         expect(resp2.updateCache).toBeTruthy();
     });
 
-    test("success - inserts in Firestore", async () => {
+    test("success - update in Firestore", async () => {
         let fbc = new FBCache();
         await fbc.firestore().collection(firestoreRoute).doc("test").set({ name: "Test" });
         const resp1 = await fbc.firestore().collection(firestoreRoute).doc("test").update({ lastname: "Test" });
         expect(resp1.routeInConfig).toBeTruthy();
         expect(resp1.updateCache).toBeFalsy();
         await fbc.firestore().collection(firestoreRoute).get();
-        const resp2 = await fbc.firestore().collection(firestoreRoute).update({ lastname: "Test" });
+        const resp2 = await fbc.firestore().collection(firestoreRoute).doc("test").update({ lastname: "Test" });
         expect(resp2.routeInConfig).toBeTruthy();
         expect(resp2.updateCache).toBeTruthy();
     });

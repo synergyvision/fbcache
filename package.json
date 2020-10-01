@@ -1,6 +1,6 @@
 {
   "name": "fbcache",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "directories": {
@@ -10,9 +10,9 @@
     "node": "12.18.3"
   },
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch --detectOpenHandles",
+    "test:coverage": "jest --coverage --detectOpenHandles",
     "build": "babel lib --out-dir dist"
   },
   "repository": {

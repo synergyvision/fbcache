@@ -202,7 +202,6 @@ function getNewData(dbms, oldData, insertData, id) {
     case service.REAL_TIME:
       newData[id] = insertData;
       return newData;
-      break;
 
     case service.FIRESTORE:
       newData.forEach(function (doc) {
@@ -216,7 +215,6 @@ function getNewData(dbms, oldData, insertData, id) {
         data: insertData
       });
       return newData;
-      break;
   }
 }
 
@@ -237,7 +235,6 @@ function getUpdateData(dbms, oldData, updateData, id) {
       }
 
       return newData;
-      break;
 
     case service.FIRESTORE:
       doc = oldData.findOneBy("id", id).data;
@@ -256,7 +253,6 @@ function getUpdateData(dbms, oldData, updateData, id) {
       }
 
       return newData;
-      break;
   }
 }
 
@@ -267,7 +263,6 @@ function getDeleteData(dbms, oldData, id) {
     case service.REAL_TIME:
       delete newData[id];
       return newData;
-      break;
 
     case service.FIRESTORE:
       for (var i = 0; i < newData.length; i++) {
@@ -278,7 +273,6 @@ function getDeleteData(dbms, oldData, id) {
       }
 
       return newData;
-      break;
   }
 }
 
@@ -411,7 +405,7 @@ controller.get = /*#__PURE__*/function () {
             infoDB = [];
             updateCache = false;
             _context2.t0 = dbms;
-            _context2.next = _context2.t0 === service.REAL_TIME ? 7 : _context2.t0 === service.FIRESTORE ? 24 : 45;
+            _context2.next = _context2.t0 === service.REAL_TIME ? 7 : _context2.t0 === service.FIRESTORE ? 23 : 43;
             break;
 
           case 7:
@@ -467,21 +461,20 @@ controller.get = /*#__PURE__*/function () {
 
           case 22:
             ;
-            return _context2.abrupt("break", 46);
 
-          case 24:
+          case 23:
             collection = null;
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!cacheRoute) {
-              _context2.next = 39;
+              _context2.next = 38;
               break;
             }
 
             infoCache = myCache.get(cacheRoute.id);
 
             if (!infoCache) {
-              _context2.next = 32;
+              _context2.next = 31;
               break;
             }
 
@@ -490,9 +483,9 @@ controller.get = /*#__PURE__*/function () {
               cache: true
             });
 
-          case 32:
+          case 31:
             collection = firestore.collection(route);
-            _context2.next = 35;
+            _context2.next = 34;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -502,7 +495,7 @@ controller.get = /*#__PURE__*/function () {
               });
             });
 
-          case 35:
+          case 34:
             updateCache = setCache(cacheRoute, infoDB);
             return _context2.abrupt("return", {
               info: infoDB,
@@ -510,13 +503,13 @@ controller.get = /*#__PURE__*/function () {
               startCache: updateCache
             });
 
-          case 37:
-            _context2.next = 43;
+          case 36:
+            _context2.next = 42;
             break;
 
-          case 39:
+          case 38:
             collection = firestore.collection(route);
-            _context2.next = 42;
+            _context2.next = 41;
             return collection.get().then(function (snapshot) {
               snapshot.forEach(function (doc) {
                 infoDB.push({
@@ -526,21 +519,17 @@ controller.get = /*#__PURE__*/function () {
               });
             });
 
-          case 42:
+          case 41:
             return _context2.abrupt("return", {
               info: infoDB,
               cache: false,
               startCache: false
             });
 
-          case 43:
+          case 42:
             ;
-            return _context2.abrupt("break", 46);
 
-          case 45:
-            throw new Error("dbms value invalid");
-
-          case 46:
+          case 43:
           case "end":
             return _context2.stop();
         }
@@ -581,7 +570,7 @@ controller.insert = /*#__PURE__*/function () {
             updateCache = false;
             routeInCache = false;
             _context3.t0 = dbms;
-            _context3.next = _context3.t0 === service.REAL_TIME ? 11 : _context3.t0 === service.FIRESTORE ? 25 : 39;
+            _context3.next = _context3.t0 === service.REAL_TIME ? 11 : _context3.t0 === service.FIRESTORE ? 24 : 37;
             break;
 
           case 11:
@@ -625,37 +614,37 @@ controller.insert = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 25:
+          case 24:
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context3.next = 28;
+              _context3.next = 27;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 28:
+          case 27:
             if (!id) {
-              _context3.next = 33;
+              _context3.next = 32;
               break;
             }
 
-            _context3.next = 31;
+            _context3.next = 30;
             return firestore.collection(route).doc(id).set(data);
 
-          case 31:
-            _context3.next = 36;
+          case 30:
+            _context3.next = 35;
             break;
 
-          case 33:
-            _context3.next = 35;
+          case 32:
+            _context3.next = 34;
             return firestore.collection(route).add(data);
 
-          case 35:
+          case 34:
             generateID = _context3.sent;
 
-          case 36:
+          case 35:
             if (cacheRoute) {
               routeInCache = true;
               updateCache = insertCache(cacheRoute, service.FIRESTORE, data, id ? id : generateID.id);
@@ -666,10 +655,7 @@ controller.insert = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 39:
-            throw new Error("dbms value invalid");
-
-          case 40:
+          case 37:
           case "end":
             return _context3.stop();
         }
@@ -717,7 +703,7 @@ controller.update = /*#__PURE__*/function () {
             updateCache = false;
             routeInCache = false;
             _context4.t0 = dbms;
-            _context4.next = _context4.t0 === service.REAL_TIME ? 12 : _context4.t0 === service.FIRESTORE ? 20 : 27;
+            _context4.next = _context4.t0 === service.REAL_TIME ? 12 : _context4.t0 === service.FIRESTORE ? 19 : 25;
             break;
 
           case 12:
@@ -745,17 +731,17 @@ controller.update = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 20:
+          case 19:
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context4.next = 23;
+              _context4.next = 22;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 23:
+          case 22:
             firestore.collection(route).doc(id).update(data);
 
             if (cacheRoute) {
@@ -768,10 +754,7 @@ controller.update = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 27:
-            throw new Error("dbms value invalid");
-
-          case 28:
+          case 25:
           case "end":
             return _context4.stop();
         }
@@ -811,7 +794,7 @@ controller["delete"] = /*#__PURE__*/function () {
             updateCache = false;
             routeInCache = false;
             _context5.t0 = dbms;
-            _context5.next = _context5.t0 === service.REAL_TIME ? 10 : _context5.t0 === service.FIRESTORE ? 18 : 25;
+            _context5.next = _context5.t0 === service.REAL_TIME ? 10 : _context5.t0 === service.FIRESTORE ? 17 : 23;
             break;
 
           case 10:
@@ -839,17 +822,17 @@ controller["delete"] = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 18:
+          case 17:
             if (routes.firestore) cacheRoute = routes.firestore.findOneBy('name', route);
 
             if (!(cacheRoute && cacheRoute.read_only || !cacheRoute && routes.read_only)) {
-              _context5.next = 21;
+              _context5.next = 20;
               break;
             }
 
             throw new Error("the path was specified as read-only");
 
-          case 21:
+          case 20:
             firestore.collection(route).doc(id)["delete"]();
 
             if (cacheRoute) {
@@ -862,10 +845,7 @@ controller["delete"] = /*#__PURE__*/function () {
               updateCache: updateCache
             });
 
-          case 25:
-            throw new Error("dbms value invalid");
-
-          case 26:
+          case 23:
           case "end":
             return _context5.stop();
         }

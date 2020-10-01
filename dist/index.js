@@ -49,14 +49,16 @@ function FBCache() {
       if (_this.route) _this.id = id;else _this.route = id;
       return _this;
     }
+
+    throw new Error("You cannot call this method without first declaring Real Time Database as DBMS");
   }, this.set = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(data) {
       return regeneratorRuntime.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
-              if (!(_this.dbms && _this.route && _this.id && data)) {
-                _context2.next = 4;
+              if (!(_this.dbms && _this.route && _this.id && (data || data === {}))) {
+                _context2.next = 6;
                 break;
               }
 
@@ -66,7 +68,34 @@ function FBCache() {
             case 3:
               return _context2.abrupt("return", _context2.sent);
 
-            case 4:
+            case 6:
+              if (_this.dbms) {
+                _context2.next = 10;
+                break;
+              }
+
+              throw new Error("You cannot call this method without first declaring a DBMS");
+
+            case 10:
+              if (_this.route) {
+                _context2.next = 14;
+                break;
+              }
+
+              throw new Error("route or collection not indicated");
+
+            case 14:
+              if (_this.id) {
+                _context2.next = 18;
+                break;
+              }
+
+              throw new Error("child or doc not indicated");
+
+            case 18:
+              throw new Error("data can't be null or undefined");
+
+            case 19:
             case "end":
               return _context2.stop();
           }
@@ -95,6 +124,9 @@ function FBCache() {
               return _context3.abrupt("return", _context3.sent);
 
             case 4:
+              throw new Error("You cannot call this method without first declaring Firestore as DBMS or a collection");
+
+            case 5:
             case "end":
               return _context3.stop();
           }
@@ -123,6 +155,9 @@ function FBCache() {
               return _context4.abrupt("return", _context4.sent);
 
             case 4:
+              throw new Error("You cannot call this method without first declaring a DBMS or reference a route for update");
+
+            case 5:
             case "end":
               return _context4.stop();
           }
@@ -150,6 +185,9 @@ function FBCache() {
             return _context5.abrupt("return", _context5.sent);
 
           case 4:
+            throw new Error("You cannot call this method without first declaring Real Time Database as DBMS, a collection and a document");
+
+          case 5:
           case "end":
             return _context5.stop();
         }
@@ -182,6 +220,9 @@ function FBCache() {
             return _context6.abrupt("return", _context6.sent);
 
           case 4:
+            throw new Error("You cannot call this method without first declaring Firestore as DBMS or a collection");
+
+          case 5:
           case "end":
             return _context6.stop();
         }
@@ -192,6 +233,8 @@ function FBCache() {
       _this.id = id;
       return _this;
     }
+
+    throw new Error("You cannot call this method without first declaring Firestore as DBMS or a collection");
   }, this.add = /*#__PURE__*/function () {
     var _ref7 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(data) {
       return regeneratorRuntime.wrap(function _callee7$(_context7) {
@@ -210,6 +253,9 @@ function FBCache() {
               return _context7.abrupt("return", _context7.sent);
 
             case 4:
+              throw new Error("You cannot call this method without first declaring Firestore as DBMS or a collection");
+
+            case 5:
             case "end":
               return _context7.stop();
           }
@@ -237,6 +283,9 @@ function FBCache() {
             return _context8.abrupt("return", _context8.sent);
 
           case 4:
+            throw new Error("You cannot call this method without first declaring Firestore as DBMS, a collection and a document");
+
+          case 5:
           case "end":
             return _context8.stop();
         }

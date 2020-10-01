@@ -42,6 +42,24 @@ describe("Test insert FBCache", () => {
         }, config.URL, "file", firebaseCredential);
     });
 
+    test("fail - call only remove() - realtime", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.remove();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Real Time Database as DBMS, a collection and a document");
+        }
+    });
+
+    test("fail - call only delete() - firestore", async () => {
+        let fbc = new FBCache();
+        try {
+            await fbc.delete();
+        } catch (error) {
+            expect(error.message).toBe("You cannot call this method without first declaring Firestore as DBMS, a collection and a document");
+        }
+    })
+
     test("success - update in Real Time Database", async () => {
         let fbc = new FBCache();
         await fbc.database().ref(realtimeRoute).child("test").set({ name: "Test" });
