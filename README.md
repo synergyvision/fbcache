@@ -1,30 +1,23 @@
 # FBCache
 
+![node version](https://img.shields.io/badge/node-12.18.3-green)
+
+![firebase-admin version](https://img.shields.io/badge/firebase-admin-9.1.1-blue)
+![node-cache version](https://img.shields.io/badge/node-cache-5.1.2-blue)
+![moment](https://img.shields.io/badge/moment-2.27.0-blue)
+![uuid](https://img.shields.io/badge/uuid-8.3.0-blue)
+
 ## Instalación
 
 npm install git://github.com/synergyvision/fbcache.git#master --save
 
-## Inicialización:
-
-```
-const module = require('fbcache')
-
-const FBCache = module.FBCache
-```
-
-- Si utiliza ECMAScript 6, puede realizarse de la siguiente forma
-
-```
-import { FBCache } from 'fbcache'
-```
-
 ## Inicialización de FBCache
 
 ```
-import { FBCache } from 'fbcache';
+import { initFBCache } from 'fbcache';
 import * as config from "./fbcache.config.json";
 
-FBCache.init(config, projectURL, credentialType, credential);
+initFBCache(config, projectURL, credentialType, credential);
 
 ```
 
@@ -38,160 +31,212 @@ _credential_ es la credencial con la que se quiere autenticar a Firebase, puede 
 
 ## Métodos
 
-### Consulta a Real Time Database o Firestore
+FBCache usa una firma similar a la que implementa _firebase-admin_, por lo que si ya has utilizado antes esta librería te adaptaras facilmente a FBCache. Para hacer una instancia de FBCache puedes realizar lo siguiente:
 
 ```
-FBCache.get( dbms, name )
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+```
+
+ya con esta instancia puedes empezar a implementar la librería
+
+### Consulta a Real Time Database
+
+```
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.database().ref(name).once();
 ```
 
 - Parámetros
-  - dbms (string): Nombre del manejador de base de datos a donde se vaya a consultar
-  - name (string): Nombre del child o colección a consultar
+  - name (string): Nombre del child a consultar en Real Time Database
 
 - Respuesta
 Este método retornará un objeto con las siguientes características
 ```
 {
-    data: Información extraida de Real Time Database o Firestore,
+    data: Información extraida de Real Time Database,
     fromCache: Boolean que indica si se realizo la consulta con la información en caché (true) o si no (false),
     updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
 ```
 
-- Ejemplo
-```
-FB.Cache.get( 'Firestore', 'users' );
-
-return
-{ 
-    data: [ { id: 1, name: "user_1" }, { id: 2, name: "user_2" } ],
-    fromCache: false,
-    updateCache: true
-}
-```
-
-### Inserta datos a Real Time Database o Firestore
+### Consulta a Firestore
 
 ```
-FBCache.set( dbms, name, insertData, id )
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.firestore().collection(name).get();
 ```
 
 - Parámetros
-  - dbms (string): Nombre del manejador de base de datos a donde se vaya a insertar
-  - name (string): Nombre del child o colección a donde se vaya a realizar la inserción
-  - insertData (object): Objeto con la información a insertar
-  - id (string || number): Indica el id con el que se quiera guardar la información en Real Time Database o Firestore, si no se indica el manejador de base de datos asignará el id automaticamente
+  - name (string): Nombre de la colección a consultar en Firestore
 
 - Respuesta
 Este método retornará un objeto con las siguientes características
 ```
 {
-    routeInConfig: Boolean que indica si se realizo una inserción a una colección o child indicado en el archivo de configuración (true) o si no (false)
+    data: Información extraida de Firestore,
+    fromCache: Boolean que indica si se realizo la consulta con la información en caché (true) o si no (false),
     updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
 ```
 
-- Ejemplo:
-```
-FBCache.set( 'Real Time Database', 'persons', { name: "Name", lastname: "Lastname" } )
-
-return:
-{
-    routeInConfig: true
-    updateCache: true
-}
-```
-
-### Actualiza datos en Real Time Database o Firestore
+### Inserta datos a Real Time Database
 
 ```
-FBCache.set( dbms, name, updateData, id )
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.database().ref(name).child(id).set(insertData);
 ```
 
 - Parámetros
-  - dbms (string): Nombre del manejador de base de datos a donde se vaya a actualizar la información
-  - name (string): Nombre del child o colección a donde se vaya a realizar la inserción
+  - name (string): Nombre del child a donde se vaya a realizar la inserción
+  - insertData (object): Objeto con la información a insertar
+  - id (string || number): Indica el id con el que se quiera guardar la información en Real Time Database
+
+- Respuesta
+Este método retornará un objeto con las siguientes características
+```
+{
+    routeInConfig: Boolean que indica si se realizo una inserción en un child indicado en el archivo de configuración (true) o si no (false)
+    updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
+}
+```
+**NOTA**: Al usar este método se puede dar el caso de que al mismo tiempo se haga la inserción de 2 objetos con el mismo id, por lo que, una puede reescribir a la otra, para evitar esto, intente insertar usando el siguiente método:
+
+```
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.database().ref().child(route).push(insertData);
+```
+
+Usando este método, Real Time Database asigna un ID único a la información que se esté insertando, haciendo que se evite sobreescribir la información de otro registro que se encuentre almacenado
+
+### Inserta datos a Firestore
+
+```
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.firestore().collection(name).doc(id).set(insertData);
+```
+
+- Parámetros
+  - name (string): Nombre de la colección a donde se vaya a realizar la inserción
+  - insertData (object): Objeto con la información a insertar
+  - id (string || number): Indica el id con el que se quiera guardar la información en Firestore
+
+- Respuesta
+Este método retornará un objeto con las siguientes características
+```
+{
+    routeInConfig: Boolean que indica si se realizo una inserción a una colección indicada en el archivo de configuración (true) o si no (false)
+    updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
+}
+```
+**NOTA**: Al usar este método se puede dar el caso de que al mismo tiempo se haga la inserción de 2 objetos con el mismo id, por lo que, una puede reescribir a la otra, para evitar esto, intente insertar usando el siguiente método:
+
+```
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.firestore().collection(name).add(insertData);
+```
+
+Usando este método, Firestore asigna un ID único a la información que se esté insertando, haciendo que se evite sobreescribir la información de otro registro que se encuentre almacenado
+
+### Actualiza datos en Real Time Database
+
+```
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.database().ref(name).child(id).update(updateData);
+```
+
+- Parámetros
+  - name (string): Nombre del child a donde se vaya a realizar la inserción
   - updateData (object): Objeto con la información que se quiere insertar para actualizar los registros
-  - id (string || number): Indica el id con el que se quiera actualizar la información en Real Time Database o Firestore
+  - id (string || number): Indica el id con el que se quiera actualizar la información en Real Time Database
 
 - Respuesta:
 Este método retornará un objeto con las siguientes características
 ```
 {
-    routeInConfig: Boolean que indica si se realizo una inserción a una colección o child indicado en el archivo de configuración (true) o si no (false)
+    routeInConfig: Boolean que indica si se realizo una inserción a un child indicado en el archivo de configuración (true) o si no (false)
     updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
 ```
 
-- Ejemplo:
-```
-FBCache.update( 'Real Time Database', 'persons', { name: "Name", lastname: "Lastname" }, "qwerty" )
-
-return:
-{
-    routeInConfig: true
-    updateCache: true
-}
-```
-
-### Elimina datos en Real Time Database o Firestore
+### Actualiza datos en Firestore
 
 ```
-FBCache.delete( dbms, name, id )
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.firestore().collection(name).doc(id).update(updateData)
 ```
 
 - Parámetros
-  - dbms (string): Nombre del manejador de base de datos a donde se vaya a eliminar
-  - name (string): Nombre del child o colección donde se realizará la eliminación
-  - id (string || number): Indica el id que se quiere eliminar en Real Time Database o Firestore, si no se indica el manejador de base de datos asignará el id automaticamente
+  - name (string): Nombre de la colección a donde se vaya a realizar la inserción
+  - updateData (object): Objeto con la información que se quiere insertar para actualizar los registros
+  - id (string || number): Indica el id con el que se quiera actualizar la información en Firestore
 
 - Respuesta:
 Este método retornará un objeto con las siguientes características
 ```
 {
-    routeInConfig: Boolean que indica si se realizo una inserción a una colección o child indicado en el archivo de configuración (true) o si no (false)
+    routeInConfig: Boolean que indica si se realizo una inserción a una colección indicada en el archivo de configuración (true) o si no (false)
     updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
 ```
 
-- Ejemplo:
-```
-FBCache.delete( 'Firestore', 'users', "qwerty" )
+### Elimina datos en Real Time Database
 
-return:
+```
+import { FBCache } from 'fbcache';
+
+let fbc = new FBCache();
+let resp = await fbc.database().ref(name).child(id).remove();
+```
+
+- Parámetros
+  - name (string): Nombre del child donde se realizará la eliminación
+  - id (string || number): Indica el id que se quiere eliminar en Real Time Database
+
+- Respuesta:
+Este método retornará un objeto con las siguientes características
+```
 {
-    routeInConfig: true
-    updateCache: true
+    routeInConfig: Boolean que indica si se realizo una eliminación a un child indicado en el archivo de configuración (true) o si no (false)
+    updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
 ```
-## Enum _service_
 
-Para evitar errores en la escritura del nombre del manejador de base de datos en los métodos de la librería, esta pone a disposición el enum _service_, que permite obtener el nombre de los manejadores de base de datos sin necesidad de pasar el nombre como un string.
+### Elimina datos en Firestore
 
-### Estructura de _service_
+```
+import { FBCache } from 'fbcache';
 
-service = {
-    FIRESTORE: 'Firestore',
-    REAL_TIME: 'Real Time Database'
+let fbc = new FBCache();
+let resp = await fbc.firestore().collection(name).doc(id).delete();
+```
+
+- Parámetros
+  - name (string): Nombre de la colección donde se realizará la eliminación
+  - id (string || number): Indica el id que se quiere eliminar en Firestore
+
+- Respuesta:
+Este método retornará un objeto con las siguientes características
+```
+{
+    routeInConfig: Boolean que indica si se realizo una eliminación a una colección indicada en el archivo de configuración (true) o si no (false)
+    updateCache: Boolean que indica si se realizo una actualización de la información en caché (true) o si no (false)
 }
-
-### Uso de _service_
-
-```
-const module = require('fbcache')
-
-const FBCache = module.FBCache;
-const service = module.service
-```
-
-- Si utiliza ECMAScript 6, puede realizarse de la siguiente forma
-```
-import { FBCache, service } from 'fbcache'
-```
-
-- Ejemplo de la implementación
-
-```
-FBCache.get( service.FIRESTORE, 'users' );
-FBCache.get( service.REAL_TIME, 'users' );
 ```

@@ -1,7 +1,7 @@
 {
   "name": "fbcache",
   "version": "1.0.0",
-  "description": "",
+  "description": "A library to use on the server side that allows you to implement a caching of the data of queries that are made to indicated paths to children in the Real Time Database or Firestore collections in an easy and simple way",
   "main": "dist/index.js",
   "directories": {
     "doc": "docs"
@@ -33,10 +33,10 @@
   },
   "homepage": "https://github.com/synergyvision/fbcache#readme",
   "dependencies": {
-    "firebase-admin": "^9.1.1",
-    "moment": "^2.27.0",
-    "node-cache": "^5.1.2",
-    "uuid": "^8.3.0"
+    "firebase-admin": "9.1.1",
+    "moment": "2.27.0",
+    "node-cache": "5.1.2",
+    "uuid": "8.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.11.5",
