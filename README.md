@@ -2,8 +2,8 @@
 
 ![node version](https://img.shields.io/badge/node-12.18.3-green)
 
-![firebase-admin version](https://img.shields.io/badge/firebase-admin-9.1.1-blue)
-![node-cache version](https://img.shields.io/badge/node-cache-5.1.2-blue)
+![firebase-admin](https://img.shields.io/badge/firebaseadmin-9.1.1-blue)
+![node-cache](https://img.shields.io/badge/nodecache-5.1.2-blue)
 ![moment](https://img.shields.io/badge/moment-2.27.0-blue)
 ![uuid](https://img.shields.io/badge/uuid-8.3.0-blue)
 
