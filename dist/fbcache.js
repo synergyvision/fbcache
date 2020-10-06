@@ -100,6 +100,17 @@ function setMaxSize(max_size) {
       throw new Error("max_size unit invalid");
   }
 }
+
+function verifyRefreshFormat(refresh) {
+  var units = ['s', 'm', 'h', 'd', 'w', 'M'];
+  var baseRefresh = refresh.split(' ');
+  if (baseRefresh.length !== 2) return false;
+  if (!(baseRefresh[0] == parseInt(baseRefresh[0], 10))) return false;
+
+  for (var i = 0; i < units.length; i++) {
+    if (units[i] === baseRefresh[1]) return true;
+  }
+}
 /**
  * Function to get from the config object the routes to Real Time Database or Firestore for the cache and checks if is all ok with the values in the config object 
  *
@@ -112,12 +123,16 @@ function setMaxSize(max_size) {
 
 function getRoutes(routes, read_only) {
   var arrayRoutes = [];
+  var refreshFormat = false;
   routes.forEach(function (route) {
     if (!route.name) throw new Error("A route defined to Firebase don't have name");
     if (route.refresh && route.period) throw new Error("Refresh and period can't be defined in the same time in the same route");
+    if (!route.refresh && !route.period) throw new Error("A route can't be defined without refresh or period");
     if (!route.period && route.start) throw new Error("start can't be defined without period");
     route.id = (0, _uuid.v4)();
+    if (route.refresh && !verifyRefreshFormat(route.refresh)) throw new Error("Refresh format invalid");else if (route.period && !verifyRefreshFormat(route.period)) throw new Error("Period format invalid");
     if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = (0, _moment["default"])();
+    if (!route.start.isValid()) throw new Error("Date format invalid");
     if (route.read_only === undefined) if (read_only === undefined) route.read_only = true;else route.read_only = read_only;
     arrayRoutes.push(route);
   });
