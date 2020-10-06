@@ -2,10 +2,12 @@
 
 ![node version](https://img.shields.io/badge/node-12.18.3-green)
 
-![firebase-admin version](https://img.shields.io/badge/firebase-admin-9.1.1-blue)
-![node-cache version](https://img.shields.io/badge/node-cache-5.1.2-blue)
+![firebase-admin](https://img.shields.io/badge/firebaseadmin-9.1.1-blue)
+![node-cache](https://img.shields.io/badge/nodecache-5.1.2-blue)
 ![moment](https://img.shields.io/badge/moment-2.27.0-blue)
 ![uuid](https://img.shields.io/badge/uuid-8.3.0-blue)
+
+Una librería para usar del lado del servidor que te permite implementar un almacenado en memoria caché de los datos de consultas que se hagan a rutas indicadas hacía childs en Real Time Database o colecciones de Firestore de una forma fácil y sencilla
 
 ## Instalación
 
@@ -21,7 +23,7 @@ initFBCache(config, projectURL, credentialType, credential);
 
 ```
 
-fbcache.config.json, es un archivo que contendrá un objeto con las configuraciones que se le quieran dar a la librería, para conocer acerca de este archivo haz click [aquí](https://github.com/synergyvision/fbcache/issues/5)
+fbcache.config.json, es un archivo que contendrá un objeto con las configuraciones que se le quieran dar a la librería, para conocer acerca de este archivo haz click [aquí](https://github.com/synergyvision/fbcache/tree/dev/docs/config_file)
 
 _projectURL_ es el URL al projecto de Firebase en donde se encuentren los childs de Real Time Database y/o las colecciones de Firestore
 
