@@ -6,6 +6,18 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+Array.prototype.findOneBy = function (column, value) {
+  for (var i = 0; i < this.length; i++) {
+    var object = this[i];
+
+    if (column in object && object[column] === value) {
+      return object;
+    }
+  }
+
+  return null;
+};
+
 function FBCache() {
   var _this = this;
 
@@ -20,25 +32,74 @@ function FBCache() {
 
     throw new Error("You cannot call this method without first declaring Real Time Database as DBMS");
   }, this.once = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    var levels, baseRoute, resp;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             if (!(_this.dbms === _fbcache.service.REAL_TIME && _this.route)) {
-              _context.next = 4;
+              _context.next = 26;
               break;
             }
 
-            _context.next = 3;
+            levels = _this.route.split('/');
+            baseRoute = levels[0];
+            levels.splice(0, 1);
+            resp = null;
+
+            if (levels.length) {
+              _context.next = 11;
+              break;
+            }
+
+            _context.next = 8;
             return _fbcache.controller.get(_this.dbms, _this.route);
 
-          case 3:
+          case 8:
             return _context.abrupt("return", _context.sent);
 
-          case 4:
+          case 11:
+            if (!levels.length) {
+              _context.next = 21;
+              break;
+            }
+
+            if (!_fbcache.controller.routeInConfig(_this.dbms, baseRoute)) {
+              _context.next = 16;
+              break;
+            }
+
+            return _context.abrupt("break", 21);
+
+          case 16:
+            baseRoute += "/";
+            baseRoute += levels[0];
+            levels.splice(0, 1);
+
+          case 19:
+            _context.next = 11;
+            break;
+
+          case 21:
+            _context.next = 23;
+            return _fbcache.controller.get(_this.dbms, baseRoute);
+
+          case 23:
+            resp = _context.sent;
+
+            if (levels.length) {
+              while (levels.length && resp.info) {
+                resp.info = resp.info[levels[0]];
+                levels.splice(0, 1);
+              }
+            }
+
+            return _context.abrupt("return", resp);
+
+          case 26:
             throw new Error("You cannot call this method without reference a child in Real Time Database");
 
-          case 5:
+          case 27:
           case "end":
             return _context.stop();
         }
@@ -204,25 +265,57 @@ function FBCache() {
 
     throw new Error("You cannot call this method without first declaring Firestore as DBMS");
   }, this.get = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+    var levels, baseRoute, resp, id;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
             if (!(_this.dbms === _fbcache.service.FIRESTORE && _this.route)) {
-              _context6.next = 4;
+              _context6.next = 17;
               break;
             }
 
-            _context6.next = 3;
+            levels = _this.route.split('/');
+            baseRoute = levels[0];
+            levels.splice(0, 1);
+            resp = null;
+            id = null;
+
+            if (levels.length) {
+              _context6.next = 12;
+              break;
+            }
+
+            _context6.next = 9;
             return _fbcache.controller.get(_this.dbms, _this.route);
 
-          case 3:
+          case 9:
             return _context6.abrupt("return", _context6.sent);
 
-          case 4:
+          case 12:
+            _context6.next = 14;
+            return _fbcache.controller.get(_this.dbms, baseRoute);
+
+          case 14:
+            resp = _context6.sent;
+
+            if (levels.length && resp.info) {
+              id = levels[0];
+              levels.splice(0, 1);
+              resp.info = resp.info.findOneBy("id", id);
+
+              while (levels.length && resp.info) {
+                resp.info = resp.info[levels[0]];
+                levels.splice(0, 1);
+              }
+            }
+
+            return _context6.abrupt("return", resp);
+
+          case 17:
             throw new Error("You cannot call this method without first declaring Firestore as DBMS or a collection");
 
-          case 5:
+          case 18:
           case "end":
             return _context6.stop();
         }
