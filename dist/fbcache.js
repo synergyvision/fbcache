@@ -82,33 +82,44 @@ function firebaseConection(url, credentialType, credential) {
 }
 
 function setMaxSize(max_size) {
-  var baseMaxSize = max_size.split(' ');
-  var quantity = baseMaxSize[0];
-  var unit = baseMaxSize[1];
+  try {
+    var baseMaxSize = max_size.split(' ');
+    if (baseMaxSize.length !== 2) throw new Error("max_size format invalid");
+    if (!(baseMaxSize[0] == parseInt(baseMaxSize[0], 10))) throw new Error("max_size format invalid");
+    var quantity = baseMaxSize[0];
+    var unit = baseMaxSize[1];
 
-  switch (unit) {
-    case "B":
-      return quantity * 1;
+    switch (unit) {
+      case "B":
+        return quantity * 1;
 
-    case "kB":
-      return quantity * 1024;
+      case "kB":
+        return quantity * 1024;
 
-    case "MB":
-      return quantity * 1048576;
+      case "MB":
+        return quantity * 1048576;
 
-    default:
-      throw new Error("max_size unit invalid");
+      default:
+        throw new Error("max_size format invalid");
+    }
+  } catch (error) {
+    throw new Error("max_size format invalid");
   }
 }
 
 function verifyRefreshFormat(refresh) {
   var units = ['s', 'm', 'h', 'd', 'w', 'M'];
-  var baseRefresh = refresh.split(' ');
-  if (baseRefresh.length !== 2) return false;
-  if (!(baseRefresh[0] == parseInt(baseRefresh[0], 10))) return false;
 
-  for (var i = 0; i < units.length; i++) {
-    if (units[i] === baseRefresh[1]) return true;
+  try {
+    var baseRefresh = refresh.split(' ');
+    if (baseRefresh.length !== 2) return false;
+    if (!(baseRefresh[0] == parseInt(baseRefresh[0], 10))) return false;
+
+    for (var i = 0; i < units.length; i++) {
+      if (units[i] === baseRefresh[1]) return true;
+    }
+  } catch (error) {
+    return false;
   }
 }
 /**
@@ -125,6 +136,13 @@ function getRoutes(routes, read_only) {
   var arrayRoutes = [];
   routes.forEach(function (route) {
     if (!route.name) throw new Error("A route defined to Firebase don't have name");
+
+    try {
+      route.name.split("ewm");
+    } catch (error) {
+      throw new Error("Invalid route");
+    }
+
     if (route.refresh && route.period) throw new Error("Refresh and period can't be defined in the same time in the same route");
     if (!route.refresh && !route.period) throw new Error("A route can't be defined without refresh or period");
     if (!route.period && route.start) throw new Error("start can't be defined without period");

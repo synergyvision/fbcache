@@ -303,6 +303,7 @@ function FBCache() {
               id = levels[0];
               levels.splice(0, 1);
               resp.info = resp.info.findOneBy("id", id);
+              if (resp.info) resp.info = resp.info.data;
 
               while (levels.length && resp.info) {
                 resp.info = resp.info[levels[0]];
