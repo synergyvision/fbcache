@@ -82,33 +82,44 @@ function firebaseConection(url, credentialType, credential) {
 }
 
 function setMaxSize(max_size) {
-  var baseMaxSize = max_size.split(' ');
-  var quantity = baseMaxSize[0];
-  var unit = baseMaxSize[1];
+  try {
+    var baseMaxSize = max_size.split(' ');
+    if (baseMaxSize.length !== 2) throw new Error("max_size format invalid");
+    if (!(baseMaxSize[0] == parseInt(baseMaxSize[0], 10))) throw new Error("max_size format invalid");
+    var quantity = baseMaxSize[0];
+    var unit = baseMaxSize[1];
 
-  switch (unit) {
-    case "B":
-      return quantity * 1;
+    switch (unit) {
+      case "B":
+        return quantity * 1;
 
-    case "kB":
-      return quantity * 1024;
+      case "kB":
+        return quantity * 1024;
 
-    case "MB":
-      return quantity * 1048576;
+      case "MB":
+        return quantity * 1048576;
 
-    default:
-      throw new Error("max_size unit invalid");
+      default:
+        throw new Error("max_size format invalid");
+    }
+  } catch (error) {
+    throw new Error("max_size format invalid");
   }
 }
 
 function verifyRefreshFormat(refresh) {
   var units = ['s', 'm', 'h', 'd', 'w', 'M'];
-  var baseRefresh = refresh.split(' ');
-  if (baseRefresh.length !== 2) return false;
-  if (!(baseRefresh[0] == parseInt(baseRefresh[0], 10))) return false;
 
-  for (var i = 0; i < units.length; i++) {
-    if (units[i] === baseRefresh[1]) return true;
+  try {
+    var baseRefresh = refresh.split(' ');
+    if (baseRefresh.length !== 2) return false;
+    if (!(baseRefresh[0] == parseInt(baseRefresh[0], 10))) return false;
+
+    for (var i = 0; i < units.length; i++) {
+      if (units[i] === baseRefresh[1]) return true;
+    }
+  } catch (error) {
+    return false;
   }
 }
 /**
@@ -123,9 +134,15 @@ function verifyRefreshFormat(refresh) {
 
 function getRoutes(routes, read_only) {
   var arrayRoutes = [];
-  var refreshFormat = false;
   routes.forEach(function (route) {
     if (!route.name) throw new Error("A route defined to Firebase don't have name");
+
+    try {
+      route.name.split("ewm");
+    } catch (error) {
+      throw new Error("Invalid route");
+    }
+
     if (route.refresh && route.period) throw new Error("Refresh and period can't be defined in the same time in the same route");
     if (!route.refresh && !route.period) throw new Error("A route can't be defined without refresh or period");
     if (!route.period && route.start) throw new Error("start can't be defined without period");
@@ -133,7 +150,11 @@ function getRoutes(routes, read_only) {
     if (route.refresh && !verifyRefreshFormat(route.refresh)) throw new Error("Refresh format invalid");else if (route.period && !verifyRefreshFormat(route.period)) throw new Error("Period format invalid");
     if (route.start) route.start = (0, _moment["default"])(route.start, formatMoment);else route.start = (0, _moment["default"])();
     if (!route.start.isValid()) throw new Error("Date format invalid");
-    if (route.read_only === undefined) if (read_only === undefined) route.read_only = true;else route.read_only = read_only;
+
+    if (route.read_only === true || route.read_only === false || route.read_only === undefined) {
+      if (route.read_only === undefined) if (read_only === undefined) route.read_only = true;else route.read_only = read_only;
+    } else throw new Error("Invalid read_only value");
+
     arrayRoutes.push(route);
   });
   return arrayRoutes;
@@ -376,7 +397,29 @@ controller.init = /*#__PURE__*/function () {
             throw new Error("config can't be null or undefined");
 
           case 5:
-            if (config.read_only || config.read_only === undefined) routes.read_only = true;else routes.read_only = false;
+            if (!(config.read_only === true || config.read_only === undefined)) {
+              _context.next = 9;
+              break;
+            }
+
+            routes.read_only = true;
+            _context.next = 14;
+            break;
+
+          case 9:
+            if (!(config.read_only === false)) {
+              _context.next = 13;
+              break;
+            }
+
+            routes.read_only = false;
+            _context.next = 14;
+            break;
+
+          case 13:
+            throw new Error("Invalid read_only value");
+
+          case 14:
             if (config.realtime) routes.realtime = getRoutes(config.realtime);
             if (config.firestore) routes.firestore = getRoutes(config.firestore);
             if (config.max_size) routes.max_size = setMaxSize(config.max_size);
@@ -386,7 +429,7 @@ controller.init = /*#__PURE__*/function () {
             response.success = true;
             return _context.abrupt("return", response);
 
-          case 14:
+          case 22:
           case "end":
             return _context.stop();
         }
@@ -447,7 +490,7 @@ controller.get = /*#__PURE__*/function () {
             _context2.next = 16;
             return rtdb.ref(route).once('value', function (snapshot) {
               infoDB = snapshot.val();
-              updateCache = setCache(cacheRoute, snapshot.val());
+              if (infoDB) updateCache = setCache(cacheRoute, snapshot.val());
             });
 
           case 16:
@@ -596,7 +639,7 @@ controller.insert = /*#__PURE__*/function () {
               break;
             }
 
-            throw new Error("the path was specified as read-only");
+            throw new Error("the path is read-only");
 
           case 14:
             if (!id) {
@@ -637,7 +680,7 @@ controller.insert = /*#__PURE__*/function () {
               break;
             }
 
-            throw new Error("the path was specified as read-only");
+            throw new Error("the path is read-only");
 
           case 27:
             if (!id) {
@@ -729,7 +772,7 @@ controller.update = /*#__PURE__*/function () {
               break;
             }
 
-            throw new Error("the path was specified as read-only");
+            throw new Error("the path is read-only");
 
           case 15:
             _context4.next = 17;
@@ -754,7 +797,7 @@ controller.update = /*#__PURE__*/function () {
               break;
             }
 
-            throw new Error("the path was specified as read-only");
+            throw new Error("the path is read-only");
 
           case 22:
             firestore.collection(route).doc(id).update(data);
@@ -820,7 +863,7 @@ controller["delete"] = /*#__PURE__*/function () {
               break;
             }
 
-            throw new Error("the path was specified as read-only");
+            throw new Error("the path is read-only");
 
           case 13:
             _context5.next = 15;
@@ -845,7 +888,7 @@ controller["delete"] = /*#__PURE__*/function () {
               break;
             }
 
-            throw new Error("the path was specified as read-only");
+            throw new Error("the path is read-only");
 
           case 20:
             firestore.collection(route).doc(id)["delete"]();
@@ -871,7 +914,22 @@ controller["delete"] = /*#__PURE__*/function () {
   return function (_x15, _x16, _x17) {
     return _ref5.apply(this, arguments);
   };
-}(); //--------------------------------------------controller METHODS---------------------------------------------
+}();
+
+controller.routeInConfig = function (dbms, route) {
+  switch (dbms) {
+    case service.REAL_TIME:
+      if (routes.realtime && routes.realtime.findOneBy('name', route)) return true;
+      break;
+
+    default:
+      if (routes.firestore && routes.firestore.findOneBy('name', route)) return true;
+      break;
+  }
+
+  ;
+  return false;
+}; //--------------------------------------------controller METHODS---------------------------------------------
 
 
 module.exports = {
